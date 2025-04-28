@@ -76,6 +76,87 @@
           </div>
         </div>
       </div>
+
+      <div class="component-demo">
+        <h3 class="component-title">Buttons with Icons (Start Position)</h3>
+        <div class="component-description">
+          <p>Buttons with icons positioned at the start.</p>
+        </div>
+        <div class="component-example">
+          <div class="flex flex-wrap gap-4">
+            <Button variant="primary" :icon="IconLup">Search</Button>
+            <Button variant="secondary" :icon="IconLup">Notifications</Button>
+            <Button variant="primary-outline" :icon="IconLeftChevron">Back</Button>
+            <Button variant="secondary-outline" :icon="IconLeftChevron">Previous</Button>
+            <Button variant="link" :icon="IconLup">Search More</Button>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-demo">
+        <h3 class="component-title">Buttons with Icons (End Position)</h3>
+        <div class="component-description">
+          <p>Buttons with icons positioned at the end.</p>
+        </div>
+        <div class="component-example">
+          <div class="flex flex-wrap gap-4">
+            <Button variant="primary" :icon="IconRightChevron" iconPosition="end">Continue</Button>
+            <Button variant="secondary" :icon="IconRightChevron" iconPosition="end">Next</Button>
+            <Button variant="primary-outline" :icon="IconRightChevron" iconPosition="end">Next Step</Button>
+            <Button variant="secondary-outline" :icon="IconRightChevron" iconPosition="end">Skip</Button>
+            <Button variant="link" :icon="IconRightChevron" iconPosition="end">Learn More</Button>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-demo">
+        <h3 class="component-title">Icon-Only Buttons</h3>
+        <div class="component-description">
+          <p>Buttons that display only an icon.</p>
+        </div>
+        <div class="component-example">
+          <div class="flex flex-wrap gap-4">
+            <Button variant="primary" :icon="IconLup" size="icon" aria-label="Search"></Button>
+            <Button variant="secondary" :icon="IconRightChevron" size="icon" aria-label="Next"></Button>
+            <Button variant="primary-outline" :icon="IconLeftChevron" size="icon" aria-label="Back"></Button>
+            <Button variant="secondary-outline" :icon="IconDownChevron" size="icon" aria-label="Down"></Button>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-demo">
+        <h3 class="component-title">Disabled Buttons</h3>
+        <div class="component-description">
+          <p>Buttons in their disabled state.</p>
+        </div>
+        <div class="component-example">
+          <div class="flex flex-wrap gap-4">
+            <Button variant="primary" disabled>Primary Disabled</Button>
+            <Button variant="secondary" disabled>Secondary Disabled</Button>
+            <Button variant="primary-outline" disabled>Outline Disabled</Button>
+            <Button variant="secondary-outline" disabled>Secondary Outline Disabled</Button>
+            <Button variant="link" disabled>Link Disabled</Button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="component-demo">
+        <h3 class="component-title">Button Usage in Context</h3>
+        <div class="component-description">
+          <p>Examples of buttons used in a typical form or action context.</p>
+        </div>
+        <div class="component-example">
+          <div class="flex flex-wrap justify-between">
+            <div>
+              <Button variant="primary-outline" :icon="IconLeftChevron">Previous</Button>
+            </div>
+            <div class="flex gap-2">
+              <Button variant="secondary-outline">Cancel</Button>
+              <Button variant="primary">Save Changes</Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 </template>

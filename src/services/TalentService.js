@@ -17,7 +17,11 @@ const getTalents = (filters = {}) => {
 
   // The backend endpoint is /users/contractor
   return axios.get(`${apiUrl}/users/contractor`, {
-    params: formattedFilters
+    params: formattedFilters,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
   });
 };
 

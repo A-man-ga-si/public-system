@@ -126,7 +126,6 @@ describe('UserCard.vue', () => {
 
   it('formats date correctly', () => {
     // Create a fixed date for testing
-    const fixedDate = new Date('2023-07-15');
     const formattedDateString = '15 Juli 2023';
     
     // Mock the Intl.DateTimeFormat to return a fixed format

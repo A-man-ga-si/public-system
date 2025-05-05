@@ -86,34 +86,6 @@
         </div>
 
         <!-- Talent Cards -->
-        <!-- <div v-else class="talent-grid">
-          <div class="talent-card-wrapper" v-for="(talent, index) in talents" :key="talent.id || index">
-            <div class="talent-card">
-              <div class="talent-image-container">
-                <img class="talent-image" :src="talent.image" :alt="talent.name" />
-                <div class="bookmark-icon" @click="toggleBookmark(talent)">
-                  <i class="simple-icon-star" :class="{ 'filled': talent.bookmarked }"></i>
-                </div>
-                <div class="talent-badge experience-badge">
-                  {{ talent.experienceYears }} Tahun Pengalaman
-                </div>
-                <div class="talent-badge specialty-badge">
-                  {{ talent.skill }}
-                </div>
-              </div>
-              <div class="talent-info">
-                <h3 class="talent-name">{{ talent.firstName }} {{ talent.lastName }}</h3>
-                <p class="talent-location">
-                  <i class="simple-icon-location-pin"></i> {{ talent.currentLocation }}
-                </p>
-                <div class="talent-footer">
-                  <div class="talent-price">Rp {{ formatPrice(talent.price) }}</div>
-                  <div class="talent-date">Terakhir dikontrak: {{ formatDate(talent.lastContracted) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
         <div v-else class="talent-grid">
           <UserCard 
             v-for="(talent, index) in talents" 

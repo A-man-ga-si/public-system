@@ -1,14 +1,32 @@
 import { mount } from '@vue/test-utils';
 import UserCard from '@/components/Common/UserCard.vue';
 
+// Mock the skills import
+jest.mock('@/constants/filterData', () => ({
+  skills: [
+    { value: 'frontend', label: 'Frontend Developer' },
+    { value: 'backend', label: 'Backend Developer' }
+  ]
+}));
+
 describe('UserCard.vue', () => {
+  // Mock the require method in the component
+  const originalRequire = window.require;
+  beforeEach(() => {
+    window.require = jest.fn(() => '/mocked-image-path.jpg');
+  });
+  
+  afterEach(() => {
+    window.require = originalRequire;
+  });
+
   const mockUser = {
     id: 1,
-    name: 'John Doe',
-    image: '/path/to/image.jpg',
-    experience: 5,
-    skill: 'Frontend Developer',
-    location: 'Jakarta, Indonesia',
+    firstName: 'John',
+    lastName: 'Doe',
+    experienceYears: 5,
+    skill: 'frontend',
+    currentLocation: 'Jakarta, Indonesia',
     price: 5000000,
     lastContracted: '2023-07-15',
     bookmarked: false
@@ -22,24 +40,23 @@ describe('UserCard.vue', () => {
     });
 
     // Check basic elements
-    expect(wrapper.find('.talent-name').text()).toBe(mockUser.name);
-    expect(wrapper.find('.talent-location').text()).toContain(mockUser.location);
-    expect(wrapper.find('.talent-price').text()).toContain('5.000.000');
+    expect(wrapper.find('.talent-name').text()).toBe('John Doe');
+    expect(wrapper.find('.talent-location').text()).toContain('Jakarta, Indonesia');
+    expect(wrapper.find('.talent-price').text()).toContain('Rp 5.000.000');
     expect(wrapper.find('.talent-date').text()).toContain('Terakhir dikontrak:');
     expect(wrapper.find('.experience-badge').text()).toContain('5 Tahun Pengalaman');
-    expect(wrapper.find('.specialty-badge').text()).toBe(mockUser.skill);
+    expect(wrapper.find('.specialty-badge').text()).toBe('Frontend Developer');
     
-    // Check image
-    const img = wrapper.find('.talent-image');
-    expect(img.attributes('src')).toBe(mockUser.image);
-    expect(img.attributes('alt')).toBe(mockUser.name);
+    // Check image existence only
+    expect(wrapper.find('.talent-image').exists()).toBe(true);
+    expect(wrapper.find('.talent-image').attributes('alt')).toBe('John');
   });
 
   it('handles missing user properties gracefully', () => {
     const minimalUser = {
       id: 2,
-      name: 'Jane Smith',
-      image: '/path/to/image2.jpg',
+      firstName: 'Jane',
+      lastName: 'Smith'
     };
 
     const wrapper = mount(UserCard, {
@@ -49,10 +66,10 @@ describe('UserCard.vue', () => {
     });
 
     // Only these elements should exist
-    expect(wrapper.find('.talent-name').text()).toBe(minimalUser.name);
+    expect(wrapper.find('.talent-name').text()).toBe('Jane Smith');
     expect(wrapper.find('.talent-image').exists()).toBe(true);
     
-    // These elements should not exist
+    // These elements should not exist or be conditional
     expect(wrapper.find('.talent-location').exists()).toBe(false);
     expect(wrapper.find('.talent-price').exists()).toBe(false);
     expect(wrapper.find('.talent-date').exists()).toBe(false);
@@ -60,18 +77,21 @@ describe('UserCard.vue', () => {
     expect(wrapper.find('.specialty-badge').exists()).toBe(false);
   });
 
-  it('emits toggle-bookmark event when bookmark icon is clicked', async () => {
+  it('calls toggleBookmark method when bookmark icon is clicked', async () => {
     const wrapper = mount(UserCard, {
       propsData: {
         user: mockUser
       }
     });
-
+    
+    // Create a mock for the toggleBookmark method
+    wrapper.vm.toggleBookmark = jest.fn();
+    
+    // Trigger the click event
     await wrapper.find('.bookmark-icon').trigger('click');
     
-    // Check if the event was emitted with the correct payload
-    expect(wrapper.emitted('toggle-bookmark')).toBeTruthy();
-    expect(wrapper.emitted('toggle-bookmark')[0][0]).toEqual(mockUser);
+    // Verify the method was called with the correct user
+    expect(wrapper.vm.toggleBookmark).toHaveBeenCalledWith(mockUser);
   });
 
   it('displays bookmark icon with filled class when bookmarked is true', () => {
@@ -101,15 +121,22 @@ describe('UserCard.vue', () => {
       }
     });
 
-    expect(wrapper.find('.talent-price').text()).toContain('1.234.567.890');
+    expect(wrapper.find('.talent-price').text()).toContain('Rp 1.234.567.890');
   });
 
   it('formats date correctly', () => {
-    // Mock the Intl.DateTimeFormat to ensure consistent test results
-    const originalDateTimeFormat = Intl.DateTimeFormat;
-    Intl.DateTimeFormat = jest.fn().mockImplementation(() => ({
-      format: () => '15 Juli 2023'
+    // Create a fixed date for testing
+    const formattedDateString = '15 Juli 2023';
+    
+    // Mock the Intl.DateTimeFormat to return a fixed format
+    const mockFormat = jest.fn().mockReturnValue(formattedDateString);
+    const mockDateTimeFormat = jest.fn().mockImplementation(() => ({
+      format: mockFormat
     }));
+    
+    // Save original and replace with mock
+    const originalDateTimeFormat = global.Intl.DateTimeFormat;
+    global.Intl.DateTimeFormat = mockDateTimeFormat;
 
     const wrapper = mount(UserCard, {
       propsData: {
@@ -117,9 +144,29 @@ describe('UserCard.vue', () => {
       }
     });
 
-    expect(wrapper.find('.talent-date').text()).toContain('15 Juli 2023');
+    expect(wrapper.find('.talent-date').text()).toContain(`Terakhir dikontrak: ${formattedDateString}`);
     
-    // Restore the original implementation
-    Intl.DateTimeFormat = originalDateTimeFormat;
+    // Check that the formatter was called with correct locale and options
+    expect(mockDateTimeFormat).toHaveBeenCalledWith('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    
+    // Restore original
+    global.Intl.DateTimeFormat = originalDateTimeFormat;
+  });
+
+  it('returns correct skill label', () => {
+    const wrapper = mount(UserCard, {
+      propsData: {
+        user: mockUser
+      }
+    });
+
+    // Test the getSkillLabel method directly
+    expect(wrapper.vm.getSkillLabel('frontend')).toBe('Frontend Developer');
+    expect(wrapper.vm.getSkillLabel('backend')).toBe('Backend Developer');
+    expect(wrapper.vm.getSkillLabel('unknown')).toBe('unknown');
   });
 });

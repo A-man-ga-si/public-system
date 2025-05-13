@@ -28,17 +28,21 @@
       <div class="profile-main-card">
         <div class="row main-content">
 
+        <!-- Left Column - Profile Image -->
         <div class="col-md-3 mb-4">
           <img :src="talent.image" alt="Talent Image" class="img-fluid profile-image" />
         </div>
 
+        <!-- Right Column - All Sections -->
         <div class="col-md-9">
           
+          <!-- Tentang Saya Section -->
           <div class="section-card mb-4">
             <h4 class="section-title">Tentang Saya</h4>
             <p>{{ talent.about }}</p>
           </div>
 
+          <!-- Pengalaman Section -->
           <div class="section-card mb-4">
             <h4 class="section-title">Pengalaman</h4>
             <div v-for="(exp, index) in experiences" :key="exp.id" class="experience-item">
@@ -80,8 +84,7 @@ export default {
     IconPdf,
     IconDownloadButton,
     IconLocation,
-    IconWhatsapp,
-    IconDownloadButton
+    IconWhatsapp
   },data() {
     return {
       talentId: this.$route.params.talentId,

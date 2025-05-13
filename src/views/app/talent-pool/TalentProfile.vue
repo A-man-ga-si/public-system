@@ -108,13 +108,10 @@
 </template>
 
 <script>
-import TalentService from '@/services/TalentService';
 import IconLeftChevron from '@/assets/icons/IconLeftChevron.vue';
 import IconStar from '@/assets/icons/IconStar.vue';
 import IconPdf from '@/assets/icons/IconPdf.vue';
 import IconDownloadButton from '@/assets/icons/IconDownloadButton.vue';
-import IconLocation from '@/assets/icons/IconLocation.vue';
-import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 
 export default {
   name: 'TalentProfile',
@@ -123,8 +120,6 @@ export default {
     IconStar,
     IconPdf,
     IconDownloadButton,
-    IconLocation,
-    IconWhatsapp
   },data() {
     return {
       talentId: this.$route.params.talentId,

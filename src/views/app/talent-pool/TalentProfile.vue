@@ -185,7 +185,8 @@ export default {
       ],
       loading: false,
       experiencesLoading: false,
-      certificationsLoading: false,      error: null,
+      certificationsLoading: false,
+      error: null,
       experiencesError: null,
       certificationsError: null
     };

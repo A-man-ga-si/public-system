@@ -26,7 +26,8 @@
     </div>    
     <div v-else>
       <div class="profile-main-card">
-          <div class="d-flex justify-content-between mb-4">
+        
+        <div class="d-flex justify-content-between mb-4">
             <b-button variant="outline-primary" @click="goBack" size="lg" class="d-flex align-items-center back-button">
               <IconLeftChevron class="mr-2" />
               <span>Kembali</span>
@@ -71,6 +72,31 @@
               <hr v-if="index !== experiences.length - 1" class="experience-divider">
             </div>
           </div>
+          
+          <div class="section-card mb-4">
+            <h4 class="section-title">Bersedia Ditempatkan di Kota</h4>
+            <div class="talent-badges">
+              <span v-for="loc in talent.preferredLocations" :key="loc" class="badge location-badge mr-2 mb-2">{{ loc }}</span>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <h4 class="section-title">Sertifikasi</h4>            <div v-for="cert in certifications" :key="cert.id" class="certification-item mb-3">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                <div class="d-flex align-items-center mb-3 mb-sm-0">
+                  <IconPdf class="mr-3" />
+                  <div>
+                    <span class="certification-title"><b>{{ cert.title }}</b></span>
+                    <small class="text-muted d-block certification-size">{{ formatFileSize(cert.fileSize) }}</small>
+                  </div>
+                </div>
+                <b-button variant="primary" @click="downloadCertificate(cert)" size="lg" class="d-flex align-items-center download-button">
+                  <span class="mr-2">Download File</span>
+                  <IconDownloadButton />
+                </b-button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -79,6 +105,7 @@
 </template>
 
 <script>
+import TalentService from '@/services/TalentService';
 import IconLeftChevron from '@/assets/icons/IconLeftChevron.vue';
 import IconStar from '@/assets/icons/IconStar.vue';
 import IconPdf from '@/assets/icons/IconPdf.vue';
@@ -94,7 +121,7 @@ export default {
     IconPdf,
     IconDownloadButton,
     IconLocation,
-    IconWhatsapp,
+    IconWhatsapp
   },data() {
     return {
       talentId: this.$route.params.talentId,
@@ -158,13 +185,29 @@ export default {
       ],
       loading: false,
       experiencesLoading: false,
-      certificationsLoading: false,      
-      error: null,
+      certificationsLoading: false,      error: null,
       experiencesError: null,
       certificationsError: null
     };
   },  methods: {    goBack() {
       this.$router.go(-1);
+    },
+    downloadCertificate(cert) {
+      // Implement certificate download
+      console.log('Downloading certificate:', cert.title);
+      
+      // Show a toast notification
+      this.$bvToast.toast(`Mengunduh ${cert.title}`, {
+        title: 'Download',
+        variant: 'info',
+        solid: true
+      });
+      
+      window.open(cert.fileUrl, '_blank');
+    },
+    formatCurrency(value) {
+      if (value === null || value === undefined) return 'N/A';
+      return new Intl.NumberFormat('id-ID').format(value);
     },
     formatDate(dateString) {
       if (!dateString) return 'Present';
@@ -418,6 +461,21 @@ h2 {
   margin-bottom: 1rem;
 }
 
+/* Certification Styles */
+.certification-item {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.certification-title {
+  display: block;
+}
+
+.certification-size {
+  font-size: 0.75rem;
+}
+
 .location-badge {
   display: inline-block;
   padding: 6px 12px;
@@ -459,6 +517,26 @@ h2 {
 }
 
 .date-duration, .location-workmode {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* Certification items */
+.certification-item {
+  border-radius: var(--radi-lg, 12px);
+  border: 1px solid var(--Colors-Colors-Base-Light-Gray, #ECEDEE);
+  background: var(--Colors-Colors-Base-Lightest-Gray, #F8F8F8);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.certification-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--Colors-Colors-Brand-Brand-Typography-Main-Black, #3A3A3A);
+}
+
+.certification-size {
   font-size: 0.75rem;
   color: #6c757d;
 }

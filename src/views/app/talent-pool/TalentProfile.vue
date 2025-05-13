@@ -68,7 +68,6 @@
 </template>
 
 <script>
-import TalentService from '@/services/TalentService';
 import IconLeftChevron from '@/assets/icons/IconLeftChevron.vue';
 import IconStar from '@/assets/icons/IconStar.vue';
 import IconPdf from '@/assets/icons/IconPdf.vue';
@@ -84,7 +83,7 @@ export default {
     IconPdf,
     IconDownloadButton,
     IconLocation,
-    IconWhatsapp
+    IconWhatsapp,
   },data() {
     return {
       talentId: this.$route.params.talentId,

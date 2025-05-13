@@ -47,7 +47,9 @@
 
         <!-- Right Column - All Sections -->
         <div class="col-md-9">
-          
+
+          <!-- section profile << profile >> -->
+
           <!-- Tentang Saya Section -->
           <div class="section-card mb-4">
             <h4 class="section-title">Tentang Saya</h4>

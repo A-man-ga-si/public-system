@@ -58,60 +58,77 @@ describe('TalentProfile.vue', () => {
     });
   });
 
-  it('renders correctly', () => {
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper.find('.talent-profile-container').exists()).toBe(true);
+  describe('General Component Behavior', () => {
+    it('renders correctly', () => {
+      expect(wrapper.exists()).toBe(true);
+      expect(wrapper.find('.talent-profile-container').exists()).toBe(true);
+    });
+
+    it('shows loading state', async () => {
+      await wrapper.setData({ loading: true });
+      expect(wrapper.find('.loading-container').exists()).toBe(true);
+    });
+
+    it('shows error state', async () => {
+      await wrapper.setData({ error: 'Test error' });
+      expect(wrapper.find('.error-container').exists()).toBe(true);
+      expect(wrapper.find('.error-container').text()).toContain('Test error');
+    });
+
+    it('handles back button click', () => {
+      const goBackSpy = jest.spyOn(router, 'go');
+      wrapper.find('.back-button').trigger('click');
+      expect(goBackSpy).toHaveBeenCalledWith(-1);
+    });
   });
 
-  it('shows loading state', async () => {
-    await wrapper.setData({ loading: true });
-    expect(wrapper.find('.loading-container').exists()).toBe(true);
+  describe('Tentang Saya Section', () => {
+    it('displays about section with correct content', () => {
+      const aboutSection = wrapper.find('.section-card');
+      expect(aboutSection.exists()).toBe(true);
+      expect(aboutSection.find('h4').text()).toBe('Tentang Saya');
+      expect(aboutSection.find('p').text()).toBe(mockTalent.about);
+    });
+
+    it('handles empty about text', async () => {
+      await wrapper.setData({ talent: { ...mockTalent, about: '' } });
+      const aboutText = wrapper.find('.section-card p').text();
+      expect(aboutText).toBe('');
+    });
   });
 
-  it('shows error state', async () => {
-    await wrapper.setData({ error: 'Test error' });
-    expect(wrapper.find('.error-container').exists()).toBe(true);
-    expect(wrapper.find('.error-container').text()).toContain('Test error');
-  });
+  describe('Pengalaman Section', () => {
+    it('renders experience items correctly', () => {
+      const experienceItems = wrapper.findAll('.experience-item');
+      expect(experienceItems.length).toBe(mockExperiences.length);
+    });
 
-  it('displays about section with correct content', () => {
-    const aboutSection = wrapper.find('.section-card');
-    expect(aboutSection.exists()).toBe(true);
-    expect(aboutSection.find('h4').text()).toBe('Tentang Saya');
-    expect(aboutSection.find('p').text()).toBe(mockTalent.about);
-  });
+    it('formats date range correctly', () => {
+      const exp = mockExperiences[0];
+      expect(wrapper.vm.formatDateRange(exp.startDate, exp.endDate))
+        .toBe('Jan 2016 - Jun 2019');
+    });
 
-  it('handles empty about text', async () => {
-    await wrapper.setData({ talent: { ...mockTalent, about: '' } });
-    const aboutText = wrapper.find('.section-card p').text();
-    expect(aboutText).toBe('');
-  });
+    it('calculates duration correctly', () => {
+      expect(wrapper.vm.calculateDuration('2016-01-01', '2019-06-30'))
+        .toBe('3 thn 5 bln');
+    });
 
-  it('renders experience items correctly', () => {
-    const experienceItems = wrapper.findAll('.experience-item');
-    expect(experienceItems.length).toBe(mockExperiences.length);
-  });
+    it('handles invalid dates', () => {
+      expect(wrapper.vm.calculateDuration('invalid', '2019-06-30'))
+        .toBe('Invalid start date');
+      expect(wrapper.vm.calculateDuration('2019-06-30', 'invalid'))
+        .toBe('Invalid end date');
+    });
 
-  it('formats date range correctly', () => {
-    const exp = mockExperiences[0];
-    expect(wrapper.vm.formatDateRange(exp.startDate, exp.endDate))
-      .toBe('Jan 2016 - Jun 2019');
-  });
+    it('handles experience with no end date', () => {
+      const duration = wrapper.vm.calculateDuration('2023-01-01', null);
+      expect(duration).toBe('2 thn 4 bln');
+    });
 
-  it('calculates duration correctly', () => {
-    expect(wrapper.vm.calculateDuration('2016-01-01', '2019-06-30'))
-      .toBe('3 thn 5 bln');
-  });
-
-  it('handles invalid dates', () => {
-    expect(wrapper.vm.calculateDuration('invalid', '2019-06-30'))
-      .toBe('Invalid start date');
-    expect(wrapper.vm.calculateDuration('2019-06-30', 'invalid'))
-      .toBe('Invalid end date');
-  });
-
-  it('handles experience with no end date', () => {
-    const duration = wrapper.vm.calculateDuration('2023-01-01', null);
-    expect(duration).toBe('2 thn 4 bln');
+    it('handles future start date', () => {
+      expect(wrapper.vm.calculateDuration('2026-01-01', '2026-06-30'))
+        .toBe('Belum dimulai');
+    });
   });
 });

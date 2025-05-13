@@ -131,4 +131,47 @@ describe('TalentProfile.vue', () => {
         .toBe('Belum dimulai');
     });
   });
+
+  describe('Bersedia Ditempatkan di Kota Section', () => {
+    it('displays all preferred locations', () => {
+      const locationBadges = wrapper.findAll('.location-badge');
+      expect(locationBadges.length).toBe(mockTalent.preferredLocations.length);
+      expect(locationBadges.at(0).text()).toBe(mockTalent.preferredLocations[0]);
+    });
+
+    it('handles empty preferred locations array', async () => {
+      await wrapper.setData({ talent: { ...mockTalent, preferredLocations: [] } });
+      const locationBadges = wrapper.findAll('.location-badge');
+      expect(locationBadges.length).toBe(0);
+    });
+  });
+
+  describe('Sertifikasi Section', () => {
+    it('renders certification items correctly', () => {
+      const certItems = wrapper.findAll('.certification-item');
+      expect(certItems.length).toBe(mockCertifications.length);
+    });
+
+    it('formats file size correctly', () => {
+      expect(wrapper.vm.formatFileSize(5242880)).toBe('5.0 MB');
+    });
+
+    it('handles download certificate click', () => {
+      const windowSpy = jest.spyOn(window, 'open').mockImplementation(() => {});
+      const toastSpy = jest.spyOn(wrapper.vm.$bvToast, 'toast');
+      
+      wrapper.vm.downloadCertificate(mockCertifications[0]);
+      
+      expect(windowSpy).toHaveBeenCalledWith(mockCertifications[0].fileUrl, '_blank');
+      expect(toastSpy).toHaveBeenCalled();
+      
+      windowSpy.mockRestore();
+    });
+
+    it('handles invalid file size', () => {
+      expect(wrapper.vm.formatFileSize(0)).toBeNull();
+      expect(wrapper.vm.formatFileSize(null)).toBeNull();
+      expect(wrapper.vm.formatFileSize(undefined)).toBeNull();
+    });
+  });
 });

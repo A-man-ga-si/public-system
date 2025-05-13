@@ -1,8 +1,8 @@
 <template>
-  <div class="talent-card-wrapper">
+  <div class="talent-card-wrapper" @click="navigateToProfile">
     <div class="talent-card">
       <div class="talent-image-container">
-        <img class="talent-image" :src="require('@/assets/img/profiles/2.jpg')" :alt="user.firstName" />
+        <img class="talent-image" :src="user.image || require('@/assets/img/profiles/2.jpg')" :alt="user.firstName" />
         <div class="bookmark-icon" @click="toggleBookmark(user)">
           <i class="simple-icon-star" :class="{ 'filled': user.bookmarked }"></i>
         </div>
@@ -58,6 +58,13 @@ export default {
     getSkillLabel(skillValue) {
       const skill = skills.find(s => s.value === skillValue);
       return skill ? skill.label : skillValue;
+    },
+    navigateToProfile() {
+      if (this.user && this.user.id) {
+        this.$router.push({ name: 'TalentProfile', params: { talentId: this.user.id } });
+      } else {
+        console.error('User ID is missing, cannot navigate to profile.');
+      }
     }
   }
 }
@@ -66,6 +73,7 @@ export default {
 <style scoped>
 .talent-card-wrapper {
   width: 100%;
+  cursor: pointer; /* Add cursor pointer to indicate it's clickable */
 }
 
 .talent-card {

@@ -73,6 +73,7 @@
             </div>
           </div>
           
+          <!-- Bersedia Ditempatkan di Kota Section -->
           <div class="section-card mb-4">
             <h4 class="section-title">Bersedia Ditempatkan di Kota</h4>
             <div class="talent-badges">
@@ -80,8 +81,10 @@
             </div>
           </div>
 
+          <!-- Sertifikasi Section -->
           <div class="section-card">
-            <h4 class="section-title">Sertifikasi</h4>            <div v-for="cert in certifications" :key="cert.id" class="certification-item mb-3">
+            <h4 class="section-title">Sertifikasi</h4>
+            <div v-for="cert in certifications" :key="cert.id" class="certification-item mb-3">
               <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                 <div class="d-flex align-items-center mb-3 mb-sm-0">
                   <IconPdf class="mr-3" />

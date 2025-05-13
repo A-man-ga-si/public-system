@@ -26,6 +26,17 @@
     </div>    
     <div v-else>
       <div class="profile-main-card">
+          <div class="d-flex justify-content-between mb-4">
+            <b-button variant="outline-primary" @click="goBack" size="lg" class="d-flex align-items-center back-button">
+              <IconLeftChevron class="mr-2" />
+              <span>Kembali</span>
+            </b-button>
+            <b-button variant="primary" size="lg" class="d-flex align-items-center">
+              <IconStar class="mr-2" />
+              <span>Masukkan ke Favorit</span>
+            </b-button>
+        </div>
+
         <div class="row main-content">
 
         <!-- Left Column - Profile Image -->
@@ -166,17 +177,17 @@ export default {
     },
     formatDateRange(startDate, endDate) {
       const start = this.formatDate(startDate);
-      const end = endDate ? this.formatDate(endDate) : this.formatDate(new Date('2025-05-13T00:00:00'));
+      const end = endDate ? this.formatDate(endDate) : this.formatDate(new Date());
       return `${start} - ${end}`;
     },
     calculateDuration(startDateStr, endDateStr) {
       const start = new Date(startDateStr);
-      const end = endDateStr ? new Date(endDateStr) : new Date('2025-05-13T00:00:00');
+      const end = endDateStr ? new Date(endDateStr) : new Date();
 
       if (isNaN(start.getTime())) return 'Invalid start date';
       if (isNaN(end.getTime())) return 'Invalid end date';
 
-      if (start > end) {
+      if (start > new Date()) {
           return 'Belum dimulai';
       }
 

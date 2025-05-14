@@ -136,5 +136,4 @@ export default {
   getFilterOptions,
   getMockTalents,
   getMockFilterOptions,
-  toggleBookmark
 };

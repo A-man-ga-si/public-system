@@ -118,8 +118,9 @@
               <!-- Experience List -->
               <div v-else>
                 <div v-for="(exp, index) in experiences" :key="exp.id" class="experience-item">
-                  <div class="row align-items-start">
-                    <div class="col-md-2 col-4 mb-3 mb-md-0">
+                  <div class="row align-items-center">
+                    <!-- Logo Column -->
+                    <div class="col-md-1 col-3 text-center mb-2 mb-md-0">
                       <div class="company-logo-container">
                         <div class="company-logo" v-if="exp.companyImage">
                           <img :src="exp.companyImage" :alt="exp.company" />
@@ -129,7 +130,9 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-10 col-8">
+                    
+                    <!-- Text Column -->
+                    <div class="col-md-11 col-9">
                       <h5 class="mb-1">{{ exp.title }}</h5>
                       <p class="mb-1 company-details-employment-type">
                         {{ exp.company }} · {{ formatEmploymentType(exp.employmentType) }}
@@ -147,7 +150,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Preferred Locations Section -->
             <div class="section-card mb-4">
               <h4 class="section-title">Bersedia Ditempatkan di Kota</h4>
@@ -722,9 +725,15 @@ h2 {
   font-weight: 400;
 }
 
-/* Experience items */
+/* Mengatur container experience item untuk vertical alignment */
 .experience-item {
   padding: 16px 0;
+}
+
+/* Mengatur container logo dan teks dalam satu baris */
+.experience-item .row {
+  display: flex;
+  align-items: center; /* Align items vertically center */
 }
 
 .experience-divider {
@@ -738,21 +747,23 @@ h2 {
   font-size: 1rem;
 }
 
+/* Mengatur container logo */
 .company-logo-container {
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Center align logo vertically */
+  height: 100%;
+  justify-content: flex-end; /* Push logo to right side */
 }
 
+/* Mengatur ukuran dan style logo */
 .company-logo {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  border-radius: 8px;
+  width: 64px; /* Ukuran logo - sesuaikan jika diperlukan */
+  height: 64px;
+  border-radius: 4px;
   background-color: #F0F0F0;
   overflow: hidden;
-  margin: 0;
   padding: 0;
-  margin-left: 10px;
+  margin: 0;
 }
 
 .company-logo img {
@@ -828,6 +839,54 @@ h2 {
 .lighter-text {
   font-weight: 400;
 }
+/* Mengatur posisi kolom teks */
+.experience-item .col-md-10,
+.experience-item .col-8 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  padding-left: 12px; /* Berikan sedikit jarak dari logo */
+}
+
+/* Mengatur judul dan deskripsi utama */
+.experience-item h5 {
+  margin-top: 0; /* Hilangkan margin atas pada judul */
+  margin-bottom: 5px; /* Kurangi margin bawah */
+}
+
+/* Mengatur spacing untuk teks info */
+.company-details-employment-type,
+.date-duration,
+.location-workmode {
+  margin-bottom: 4px !important; /* Kurangi margin antar baris */
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .experience-item .col-md-2 {
+    max-width: 80px;
+    padding-right: 0;
+  }
+  
+  .experience-item .col-md-10 {
+    padding-left: 10px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .experience-item .col-4 {
+    max-width: 80px;
+    padding-right: 0;
+  }
+  
+  .experience-item .col-8 {
+    padding-left: 10px;
+  }
+  
+  .company-logo-container {
+    justify-content: flex-start; /* Untuk tampilan mobile */
+  }
+}
 
 /* Responsive Design */
 @media (max-width: 576px) {
@@ -876,6 +935,33 @@ h2 {
 
   .price-estimate-card .d-flex {
     text-align: center;
+  }
+}
+/* Adjust column widths for better spacing */
+@media (min-width: 768px) {
+  .experience-item .col-md-2 {
+    max-width: 60px; /* Set a smaller fixed width for logo column */
+    padding-right: 0; /* Remove right padding */
+  }
+  
+  .experience-item .col-md-10 {
+    padding-left: 10px; /* Add a little space between logo and text */
+  }
+}
+
+/* Fix spacing for mobile view */
+@media (max-width: 767.98px) {
+  .company-logo-container {
+    justify-content: flex-start; /* Align to left on mobile */
+  }
+  
+  .experience-item .col-4 {
+    max-width: 60px; /* Set a smaller fixed width for logo column on mobile */
+    padding-right: 0; /* Remove right padding */
+  }
+  
+  .experience-item .col-8 {
+    padding-left: 10px; /* Add a little space between logo and text on mobile */
   }
 }
 </style>

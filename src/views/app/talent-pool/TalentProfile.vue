@@ -1,5 +1,6 @@
 <template>
   <div class="talent-profile-container">
+    <!-- Page Header -->
     <div class="page-header">
       <h1>Talent Pool</h1>
       <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
@@ -15,117 +16,200 @@
       </nav>
     </div>
 
+    <!-- Loading State -->
     <div v-if="loading" class="loading-container text-center py-5">
       <div class="loading"></div>
       <p class="mt-2">Memuat data talent...</p>
     </div>
 
+    <!-- Error State -->
     <div v-else-if="error" class="error-container text-center py-5">
       <i class="simple-icon-exclamation error-icon"></i>
       <p class="mt-2">{{ error }}</p>
+      <b-button variant="primary" @click="retryFetch" class="mt-3">
+        Coba Lagi
+      </b-button>
     </div>    
+    
+    <!-- Main Content -->
     <div v-else>
       <div class="profile-main-card">
         
+        <!-- Back Button -->
         <div class="d-flex justify-content-between mb-4">
-            <b-button variant="outline-primary" @click="goBack" size="lg" class="d-flex align-items-center back-button">
-              <IconLeftChevron class="mr-2" />
-              <span>Kembali</span>
-            </b-button>
-            <b-button variant="primary" size="lg" class="d-flex align-items-center">
-              <IconStar class="mr-2" />
-              <span>Masukkan ke Favorit</span>
-            </b-button>
+          <b-button variant="outline-primary" @click="goBack" size="lg" class="d-flex align-items-center back-button">
+            <IconLeftChevron class="mr-2" />
+            <span>Kembali</span>
+          </b-button>
         </div>
 
         <div class="row main-content">
 
-        <!-- Left Column - Profile Image -->
-        <div class="col-md-3 mb-4">
-          <img :src="talent.image" alt="Talent Image" class="img-fluid profile-image" />
-        </div>
-
-        <!-- Right Column - All Sections -->
-        <div class="col-md-9">
-
-          <!-- section profile << profile >> -->
-          <div class="d-flex justify-content-between align-items-start flex-wrap">
-            <div>
-              <h2>{{ talent.name }}</h2>
-              <div class="talent-contact-info mb-3">                
-                <span><IconLocation class="mr-1" />{{ talent.location }}</span>
-                <span class="ml-3"><IconWhatsapp class="mr-1" />{{ talent.phone }}</span>
-              </div>
-              <div class="talent-badges mb-4">
-                <span class="badge badge-info mr-2">{{ talent.level }}</span>
-                <span class="badge badge-info mr-2">{{ talent.experienceYears }} Tahun Pengalaman</span>
-                <span class="badge badge-secondary">{{ talent.mainSkill }}</span>
-              </div>
-            </div>
+          <!-- Left Column - Profile Image -->
+          <div class="col-md-3 mb-4">
+            <img 
+              :src="talent.image || require('@/assets/img/profiles/l-2.jpg')" 
+              alt="Talent Image" 
+              class="img-fluid profile-image" 
+            />
           </div>
 
-          <!-- Price Estimate Section -->
-          <div class="price-estimate-card mb-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-              <div class="mb-3 mb-md-0">
-                <p class="mb-2">Perkiraan Harga</p>
-                <h3 class="price-value">Rp {{ formatCurrency(talent.price) }}</h3>
-              </div>
-              <b-button variant="primary" size="lg" class="d-flex align-items-center">
-                Hubungi {{ talent.name.split(' ')[0] }}
-              </b-button>
-            </div>
-          </div>
+          <!-- Right Column - All Sections -->
+          <div class="col-md-9">
 
-          <!-- Tentang Saya Section -->
-          <div class="section-card mb-4">
-            <h4 class="section-title">Tentang Saya</h4>
-            <p>{{ talent.about }}</p>
-          </div>
-
-          <!-- Pengalaman Section -->
-          <div class="section-card mb-4">
-            <h4 class="section-title">Pengalaman</h4>
-            <div v-for="(exp, index) in experiences" :key="exp.id" class="experience-item">
-              <div class="row align-items-center">
-                <div class="col-md-1 col-3 text-center mb-2 mb-md-0">
-                  <div class="company-logo"></div>
+            <!-- Profile Information Section -->
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+              <div>
+                <h2>{{ talent.name }}</h2>
+                <div class="talent-contact-info mb-3">                
+                  <span><IconLocation class="mr-1" />{{ talent.location }}</span>
+                  <span class="ml-3"><IconWhatsapp class="mr-1" />{{ talent.phone }}</span>
                 </div>
-                <div class="col-md-11 col-9">
-                  <h5 class="mb-1">{{ exp.jobTitle }}</h5>
-                  <p class="mb-1 company-details-employment-type">{{ exp.companyName }} · {{ exp.employmentType }}</p>
-                  <p class="mb-1 lighter-text small date-duration">{{ formatDateRange(exp.startDate, exp.endDate) }} · {{ calculateDuration(exp.startDate, exp.endDate) }}</p>
-                  <p class="mb-0 lighter-text small location-workmode">{{ exp.location }} · {{ exp.workMode }}</p>
+                <div class="talent-badges mb-4">
+                  <span class="badge badge-info mr-2">{{ talent.level }}</span>
+                  <span class="badge badge-info mr-2">{{ talent.experienceYears }} Tahun Pengalaman</span>
+                  <span class="badge badge-secondary">{{ talent.mainSkill }}</span>
                 </div>
               </div>
-              <hr v-if="index !== experiences.length - 1" class="experience-divider">
             </div>
-          </div>
-          
-          <!-- Bersedia Ditempatkan di Kota Section -->
-          <div class="section-card mb-4">
-            <h4 class="section-title">Bersedia Ditempatkan di Kota</h4>
-            <div class="talent-badges">
-              <span v-for="loc in talent.preferredLocations" :key="loc" class="badge location-badge mr-2 mb-2">{{ loc }}</span>
-            </div>
-          </div>
 
-          <!-- Sertifikasi Section -->
-          <div class="section-card">
-            <h4 class="section-title">Sertifikasi</h4>
-            <div v-for="cert in certifications" :key="cert.id" class="certification-item mb-3">
-              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
-                <div class="d-flex align-items-center mb-3 mb-sm-0">
-                  <IconPdf class="mr-3" />
-                  <div>
-                    <span class="certification-title"><b>{{ cert.title }}</b></span>
-                    <small class="text-muted d-block certification-size">{{ formatFileSize(cert.fileSize) }}</small>
+            <!-- Price Estimate Section -->
+            <div class="price-estimate-card mb-4">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                  <p class="mb-2">Perkiraan Harga</p>
+                  <h3 class="price-value">Rp {{ formatCurrency(talent.price) }}</h3>
+                </div>
+                <b-button variant="primary" size="lg" class="d-flex align-items-center">
+                  Hubungi {{ talent.name ? talent.name.split(' ')[0] : '' }}
+                </b-button>
+              </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Tentang Saya</h4>
+              <p>{{ talent.about || 'Informasi tentang talent belum tersedia.' }}</p>
+            </div>
+
+            <!-- Experience Section -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Pengalaman</h4>
+              
+              <!-- Loading Experience -->
+              <div v-if="experiencesLoading" class="text-center py-3">
+                <div class="loading"></div>
+                <p class="mt-2">Memuat pengalaman...</p>
+              </div>
+              
+              <!-- Error Experience -->
+              <div v-else-if="experiencesError" class="alert alert-danger">
+                {{ experiencesError }}
+                <button class="btn btn-sm btn-outline-primary ml-2" @click="fetchTalentExperiences">
+                  Coba Lagi
+                </button>
+              </div>
+              
+              <!-- Empty Experience -->
+              <div v-else-if="experiences.length === 0" class="text-center py-3">
+                <p class="text-muted">Belum ada pengalaman yang ditambahkan.</p>
+              </div>
+              
+              <!-- Experience List -->
+              <div v-else>
+                <div v-for="(exp, index) in experiences" :key="exp.id" class="experience-item">
+                  <div class="row align-items-start">
+                    <div class="col-md-2 col-4 mb-3 mb-md-0">
+                      <div class="company-logo-container">
+                        <div class="company-logo" v-if="exp.companyImage">
+                          <img :src="exp.companyImage" :alt="exp.company" />
+                        </div>
+                        <div v-else class="company-logo">
+                          <img :src="require('@/assets/img/cards/thumb-1.jpg')" alt="Company Logo" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-10 col-8">
+                      <h5 class="mb-1">{{ exp.title }}</h5>
+                      <p class="mb-1 company-details-employment-type">
+                        {{ exp.company }} · {{ formatEmploymentType(exp.employmentType) }}
+                      </p>
+                      <p class="mb-1 lighter-text small date-duration">
+                        {{ formatDateRange(exp.startDate, exp.endDate) }} · {{ calculateDuration(exp.startDate, exp.endDate) }}
+                      </p>
+                      <p class="mb-1 lighter-text small location-workmode">
+                        {{ exp.location }} · {{ formatLocationType(exp.locationType) }}
+                      </p>
+                      <p v-if="exp.description" class="mb-0 lighter-text small">{{ exp.description }}</p>
+                    </div>
+                  </div>
+                  <hr v-if="index !== experiences.length - 1" class="experience-divider">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Preferred Locations Section -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Bersedia Ditempatkan di Kota</h4>
+              <div v-if="talent.preferredLocations && talent.preferredLocations.length > 0" class="talent-badges">
+                <span v-for="loc in talent.preferredLocations" :key="loc" class="badge location-badge mr-2 mb-2">{{ loc }}</span>
+              </div>
+              <div v-else class="text-muted">
+                Belum ada preferensi lokasi yang ditambahkan.
+              </div>
+            </div>
+
+            <!-- Certifications Section -->
+            <div class="section-card">
+              <h4 class="section-title">Sertifikasi</h4>
+              
+              <!-- Loading Certifications -->
+              <div v-if="certificationsLoading" class="text-center py-3">
+                <div class="loading"></div>
+                <p class="mt-2">Memuat sertifikasi...</p>
+              </div>
+              
+              <!-- Error Certifications -->
+              <div v-else-if="certificationsError" class="alert alert-danger">
+                {{ certificationsError }}
+                <button class="btn btn-sm btn-outline-primary ml-2" @click="fetchTalentCertifications">
+                  Coba Lagi
+                </button>
+              </div>
+              
+              <!-- Empty Certifications -->
+              <div v-else-if="certifications.length === 0" class="text-center py-3">
+                <p class="text-muted">Belum ada sertifikasi yang ditambahkan.</p>
+              </div>
+              
+              <!-- Certifications List -->
+              <div v-else>
+                <div v-for="cert in certifications" :key="cert.id" class="certification-item mb-3">
+                  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                    <div class="d-flex align-items-center mb-3 mb-sm-0">
+                      <IconPdf class="mr-3" />
+                      <div>
+                        <span class="certification-title"><b>{{ cert.title }}</b></span>
+                        <small class="text-muted d-block certification-details">
+                          File: {{ cert.file }}
+                        </small>
+                      </div>
+                    </div>
+                    <div class="certificate-actions">
+                      <b-button 
+                        variant="primary" 
+                        @click="dummyDownloadCertificate(cert)" 
+                        size="sm" 
+                        class="d-flex align-items-center"
+                        :disabled="downloadingCert === cert.id"
+                      >
+                        <div v-if="downloadingCert === cert.id" class="loading-small mr-1"></div>
+                        <i v-else class="simple-icon-cloud-download mr-1"></i>
+                        <span>{{ downloadingCert === cert.id ? 'Downloading...' : 'Download' }}</span>
+                      </b-button>
+                    </div>
                   </div>
                 </div>
-                <b-button variant="primary" @click="downloadCertificate(cert)" size="lg" class="d-flex align-items-center download-button">
-                  <span class="mr-2">Download File</span>
-                  <IconDownloadButton />
-                </b-button>
               </div>
             </div>
           </div>
@@ -133,114 +217,246 @@
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
 import IconLeftChevron from '@/assets/icons/IconLeftChevron.vue';
-import IconStar from '@/assets/icons/IconStar.vue';
 import IconPdf from '@/assets/icons/IconPdf.vue';
-import IconDownloadButton from '@/assets/icons/IconDownloadButton.vue';
 import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 import IconLocation from '@/assets/icons/IconLocation.vue';
+import TalentProfileService from '@/services/TalentProfileService';
 
 export default {
   name: 'TalentProfile',
   components: {
     IconLeftChevron,
-    IconStar,
     IconPdf,
-    IconDownloadButton,
     IconWhatsapp,
     IconLocation,
-  },data() {
+  },
+  data() {
     return {
       talentId: this.$route.params.talentId,
-      talent: { 
-        name: 'Rudy Handoko',
-        image: require('@/assets/img/profiles/l-2.jpg'), 
-        location: 'Surabaya, Jawa Timur',
-        phone: '+62 8123456789',
-        level: 'Intermediate',
-        experienceYears: '2',
-        mainSkill: 'Ahli Bangunan Gedung',
-        price: 7550000,
-        about: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien fringilla, mattis ligula consectetur, ultrices mauris. Maecenas vitae mattis tellus. Nullam quis imperdiet augue. Vestibulum auctor ornare leo, non suscipit magna interdum eu. Curabitur pellentesque nibh nibh, at maximus ante fermentum sit amet. Pellentesque commodo lacus at sodales sodales. Quisque sagittis orci ut diam condimentum, vel euismod erat placerat.',
-        preferredLocations: ['Jakarta', 'Bandung', 'Semarang', 'Yogyakarta', 'Samarinda']
-      },
-      experiences: [
-        {
-          id: 1,
-          jobTitle: 'Lead Construction Project Manager',
-          companyName: 'PT WIJAYA KARYA (Persero) Tbk',
-          employmentType: 'Full Time',
-          startDate: '2016-01-01',
-          endDate: '2019-06-30',
-          location: 'Central Jakarta',
-          workMode: 'On-site'
-        },
-        {
-          id: 2,
-          jobTitle: 'Lead Construction Project Manager',
-          companyName: 'PT WIJAYA KARYA (Persero) Tbk',
-          employmentType: 'Full Time',
-          startDate: '2019-01-01',
-          endDate: '2023-12-31',
-          location: 'Central Jakarta',
-          workMode: 'On-site'
-        },
-        {
-          id: 3,
-          jobTitle: 'Lead Construction Project Manager',
-          companyName: 'PT WIJAYA KARYA (Persero) Tbk',
-          employmentType: 'Full Time',
-          startDate: '2016-01-01',
-          endDate: '2019-06-30',
-          location: 'Central Jakarta',
-          workMode: 'On-site'
-        }
-      ],
-      certifications: [
-        {
-          id: 1,
-          title: 'Sertifikasi 1.pdf',
-          fileSize: 5562368, // 5.3MB
-          fileUrl: '#'
-        },
-        {
-          id: 2,
-          title: 'Sertifikasi 2.pdf',
-          fileSize: 4928307, // 4.7MB
-          fileUrl: '#'
-        }
-      ],
-      loading: false,
-      experiencesLoading: false,
-      certificationsLoading: false,
+      talent: {},
+      experiences: [],
+      certifications: [],
+      loading: true,
+      experiencesLoading: true,
+      certificationsLoading: true,
       error: null,
       experiencesError: null,
-      certificationsError: null
+      certificationsError: null,
+      downloadingCert: null // Track which certificate is being downloaded
     };
-  },  methods: {    goBack() {
+  },
+  methods: {
+    /**
+     * Fetch talent profile data from API
+     */
+    async fetchTalentProfile() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        // Try API first, fallback to mock in development
+        let response;
+        try {
+          response = await TalentProfileService.getTalentProfile(this.talentId);
+        } catch (apiError) {
+          console.warn('API call failed, using mock data:', apiError);
+          if (process.env.NODE_ENV === 'development') {
+            response = await TalentProfileService.getMockTalentProfile(this.talentId);
+          } else {
+            throw apiError;
+          }
+        }
+        
+        this.talent = this.mapApiDataToComponent(response.data.data);
+      } catch (error) {
+        console.error('Error fetching talent profile:', error);
+        
+        if (error.response?.status === 404) {
+          this.error = 'Talent tidak ditemukan.';
+        } else {
+          this.error = 'Gagal memuat data talent. Silakan coba lagi.';
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * Fetch talent experiences from API
+     */
+    async fetchTalentExperiences() {
+      try {
+        this.experiencesLoading = true;
+        this.experiencesError = null;
+        
+        // Try API first, fallback to mock in development
+        let response;
+        try {
+          response = await TalentProfileService.getTalentExperiences(this.talentId);
+        } catch (apiError) {
+          console.warn('Experience API call failed, using mock data:', apiError);
+          if (process.env.NODE_ENV === 'development') {
+            response = await TalentProfileService.getMockTalentExperiences(this.talentId);
+          } else if (apiError.response?.status === 404) {
+            // 404 is normal, means no experiences
+            this.experiences = [];
+            return;
+          } else {
+            throw apiError;
+          }
+        }
+        
+        this.experiences = response.data.data || [];
+      } catch (error) {
+        console.error('Error fetching talent experiences:', error);
+        this.experiencesError = 'Gagal memuat data pengalaman.';
+      } finally {
+        this.experiencesLoading = false;
+      }
+    },
+
+    /**
+     * Fetch talent certifications from API
+     */
+    async fetchTalentCertifications() {
+      try {
+        this.certificationsLoading = true;
+        this.certificationsError = null;
+        
+        // Try API first, fallback to mock in development
+        let response;
+        try {
+          response = await TalentProfileService.getTalentCertifications(this.talentId);
+        } catch (apiError) {
+          console.warn('Certificate API call failed, using mock data:', apiError);
+          if (process.env.NODE_ENV === 'development') {
+            response = await TalentProfileService.getMockTalentCertifications(this.talentId);
+          } else if (apiError.response?.status === 404) {
+            // 404 is normal, means no certifications
+            this.certifications = [];
+            return;
+          } else {
+            throw apiError;
+          }
+        }
+        
+        this.certifications = response.data.data || [];
+      } catch (error) {
+        console.error('Error fetching talent certifications:', error);
+        this.certificationsError = 'Gagal memuat data sertifikasi.';
+      } finally {
+        this.certificationsLoading = false;
+      }
+    },
+
+    /**
+     * Map API data to component format
+     * Sesuai dengan response backend yang diberikan
+     */
+    mapApiDataToComponent(apiData) {
+      return {
+        id: apiData.id,
+        name: `${apiData.firstName} ${apiData.lastName}`,
+        image: apiData.photo || require('@/assets/img/profiles/l-2.jpg'),
+        location: apiData.currentLocation,
+        phone: apiData.phoneNumber,
+        level: apiData.skkLevel,
+        experienceYears: apiData.experienceYears?.toString() || '0',
+        mainSkill: apiData.skill,
+        price: apiData.price,
+        about: apiData.aboutMe,
+        preferredLocations: apiData.preferredLocations || []
+      };
+    },
+
+    /**
+     * Format employment type dari backend enum ke display text
+     */
+    formatEmploymentType(type) {
+      const typeMap = {
+        'FULL_TIME': 'Full Time',
+        'CONTRACT': 'Contract',
+        'FREELANCE': 'Freelance',
+        'INTERNSHIP': 'Internship',
+        'TEMPORARY': 'Temporary'
+      };
+      return typeMap[type] || type;
+    },
+
+    /**
+     * Format location type dari backend enum ke display text
+     */
+    formatLocationType(type) {
+      const typeMap = {
+        'ON_SITE': 'On-site',
+        'REMOTE': 'Remote',
+        'HYBRID': 'Hybrid'
+      };
+      return typeMap[type] || type;
+    },
+
+    /**
+     * Dummy download certificate function
+     * Karena backend tidak ada endpoint download, kita buat simulasi di frontend
+     */
+    async dummyDownloadCertificate(cert) {
+      try {
+        this.downloadingCert = cert.id;
+        
+        // Call dummy download service
+        const response = await TalentProfileService.dummyDownloadCertificate(cert);
+        
+        // Create download link
+        const url = window.URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = cert.file || `certificate-${cert.id}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.$bvToast.toast('Sertifikat berhasil didownload (dummy)', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
+        });
+      } catch (error) {
+        console.error('Error downloading certificate:', error);
+        this.$bvToast.toast('Gagal mendownload sertifikat', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      } finally {
+        this.downloadingCert = null;
+      }
+    },
+
+    /**
+     * Navigation and utility methods
+     */
+    goBack() {
       this.$router.go(-1);
     },
-    downloadCertificate(cert) {
-      // Implement certificate download
-      console.log('Downloading certificate:', cert.title);
-      
-      // Show a toast notification
-      this.$bvToast.toast(`Mengunduh ${cert.title}`, {
-        title: 'Download',
-        variant: 'info',
-        solid: true
-      });
-      
-      window.open(cert.fileUrl, '_blank');
+
+    retryFetch() {
+      this.fetchTalentProfile();
+      this.fetchTalentExperiences();
+      this.fetchTalentCertifications();
     },
+
     formatCurrency(value) {
       if (value === null || value === undefined) return 'N/A';
       return new Intl.NumberFormat('id-ID').format(value);
     },
+
     formatDate(dateString) {
       if (!dateString) return 'Present';
       const options = { year: 'numeric', month: 'short' };
@@ -250,11 +466,16 @@ export default {
         return 'Invalid Date';
       }
     },
+
     formatDateRange(startDate, endDate) {
       const start = this.formatDate(startDate);
-      const end = endDate ? this.formatDate(endDate) : this.formatDate(new Date());
+      const end = endDate ? this.formatDate(endDate) : 'Present';
       return `${start} - ${end}`;
     },
+
+    /**
+     * Calculate duration between two dates
+     */
     calculateDuration(startDateStr, endDateStr) {
       const start = new Date(startDateStr);
       const end = endDateStr ? new Date(endDateStr) : new Date();
@@ -279,7 +500,6 @@ export default {
         duration += `${years} thn `;
       }
       
-      // Always show months if years is 0, or if there are remaining months
       if (months > 0 || years === 0) { 
         duration += `${months} bln`;
       }
@@ -289,22 +509,24 @@ export default {
       }
       
       return duration.trim() || 'Kurang dari sebulan';
-    },
-    formatFileSize(bytes) {
-        if (!bytes || bytes === 0) return null;
-        const mbSize = bytes / (1024 * 1024);
-        return mbSize.toFixed(1) + ' MB';
-    },
-  },  created() {
-    // No need to fetch data for now
-    this.loading = false;
-    this.experiencesLoading = false;
-    this.certificationsLoading = false;
+    }
+  },
+
+  /**
+   * Component lifecycle - fetch all data when component is created
+   */
+  async created() {
+    await Promise.all([
+      this.fetchTalentProfile(),
+      this.fetchTalentExperiences(),
+      this.fetchTalentCertifications()
+    ]);
   }
 };
 </script>
 
 <style scoped>
+/* Global Styles */
 h1, h2, h3, h4, h5, h6 {
   color: var(--Colors-Colors-Brand-Brand-Typography-Main-Black, #3A3A3A);
 }
@@ -410,7 +632,6 @@ h2 {
   height: 16px;
 }
 
-/* Bootstrap Button Overrides */
 .btn-lg {
   padding: 13px 24px;
   font-size: 0.875rem;
@@ -445,29 +666,11 @@ h2 {
   font-size: 0.8rem;
 }
 
-.download-button {
-  padding: 8px 16px;
-  font-size: 0.85rem;
-}
-
-.btn-secondary {
-  background-color: var(--Colors-Colors-Brand-Premium-Gold-Premium-Gold---300, #ff9933);
-  border-color: var(--Colors-Colors-Brand-Premium-Gold-Premium-Gold---300, #ff9933);
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus,
-.btn-secondary:active {
-  background-color: var(--Colors-Colors-Brand-Premium-Gold-Premium-Gold---400, #a45200) !important;
-  border-color: var(--Colors-Colors-Brand-Premium-Gold-Premium-Gold---400, #a45200) !important;
-}
-
 /* Price Estimate Section */
 .price-estimate-card {
   background: var(--Colors-Colors-Base-Lightest-Gray, #F8F8F8);
   border-radius: 8px;
   padding: 20px;
-  color: #fff;
 }
 
 .price-estimate-card p {
@@ -482,8 +685,6 @@ h2 {
   font-weight: bold;
   margin-bottom: 0;
 }
-
-/* Button styles moved to the Bootstrap overrides section above */
 
 /* Section headers */
 .section-title {
@@ -504,8 +705,10 @@ h2 {
   display: block;
 }
 
-.certification-size {
+.certification-details {
   font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 2px;
 }
 
 .location-badge {
@@ -535,12 +738,27 @@ h2 {
   font-size: 1rem;
 }
 
+.company-logo-container {
+  display: flex;
+  align-items: flex-start;
+}
+
 .company-logo {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 8px;
   background-color: #F0F0F0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.company-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .company-details-employment-type {
@@ -551,38 +769,6 @@ h2 {
 .date-duration, .location-workmode {
   font-size: 0.75rem;
   color: #6c757d;
-}
-
-/* Certification items */
-.certification-item {
-  border-radius: var(--radi-lg, 12px);
-  border: 1px solid var(--Colors-Colors-Base-Light-Gray, #ECEDEE);
-  background: var(--Colors-Colors-Base-Lightest-Gray, #F8F8F8);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-
-.certification-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--Colors-Colors-Brand-Brand-Typography-Main-Black, #3A3A3A);
-}
-
-.certification-size {
-  font-size: 0.75rem;
-  color: #6c757d;
-}
-
-.btn-download {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 50px;
-}
-
-.btn-download:hover {
-  background-color: #002541;
 }
 
 /* Loading and error states */
@@ -607,6 +793,16 @@ h2 {
   animation: spin 1s ease-in-out infinite;
 }
 
+.loading-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -616,7 +812,32 @@ h2 {
   color: #dc3545;
 }
 
-/* Responsive adjustments */
+/* Certificate actions */
+.certificate-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.certificate-actions .btn {
+  border-radius: 4px;
+  padding: 6px 12px;
+}
+
+.lighter-text {
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .certificate-actions {
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+  }
+}
+
 @media (max-width: 767.98px) {
   .profile-image {
     max-width: 298px;
@@ -647,9 +868,6 @@ h2 {
     justify-content: center;
   }
   
-  .company-logo {
-    margin-bottom: 12px;
-  }
   .btn {
     width: 100%;
     justify-content: center;
@@ -659,14 +877,5 @@ h2 {
   .price-estimate-card .d-flex {
     text-align: center;
   }
-  
-  .download-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-.lighter-text {
-    font-weight: 400;
 }
 </style>

@@ -49,6 +49,33 @@
         <div class="col-md-9">
 
           <!-- section profile << profile >> -->
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <h2>{{ talent.name }}</h2>
+              <div class="talent-contact-info mb-3">                
+                <span><IconLocation class="mr-1" />{{ talent.location }}</span>
+                <span class="ml-3"><IconWhatsapp class="mr-1" />{{ talent.phone }}</span>
+              </div>
+              <div class="talent-badges mb-4">
+                <span class="badge badge-info mr-2">{{ talent.level }}</span>
+                <span class="badge badge-info mr-2">{{ talent.experienceYears }} Tahun Pengalaman</span>
+                <span class="badge badge-secondary">{{ talent.mainSkill }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Estimate Section -->
+          <div class="price-estimate-card mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+              <div class="mb-3 mb-md-0">
+                <p class="mb-2">Perkiraan Harga</p>
+                <h3 class="price-value">Rp {{ formatCurrency(talent.price) }}</h3>
+              </div>
+              <b-button variant="primary" size="lg" class="d-flex align-items-center">
+                Hubungi {{ talent.name.split(' ')[0] }}
+              </b-button>
+            </div>
+          </div>
 
           <!-- Tentang Saya Section -->
           <div class="section-card mb-4">
@@ -114,6 +141,8 @@ import IconLeftChevron from '@/assets/icons/IconLeftChevron.vue';
 import IconStar from '@/assets/icons/IconStar.vue';
 import IconPdf from '@/assets/icons/IconPdf.vue';
 import IconDownloadButton from '@/assets/icons/IconDownloadButton.vue';
+import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
+import IconLocation from '@/assets/icons/IconLocation.vue';
 
 export default {
   name: 'TalentProfile',
@@ -122,6 +151,8 @@ export default {
     IconStar,
     IconPdf,
     IconDownloadButton,
+    IconWhatsapp,
+    IconLocation,
   },data() {
     return {
       talentId: this.$route.params.talentId,

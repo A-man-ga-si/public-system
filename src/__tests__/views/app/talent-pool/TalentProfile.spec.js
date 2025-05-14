@@ -15,6 +15,11 @@ describe('TalentProfile.vue', () => {
     image: 'path/to/image.jpg',
     about: 'Test about text',
     price: 7550000,
+    location: 'Surabaya, Jawa Timur',
+    phone: '+62 8123456789',
+    level: 'Intermediate',
+    experienceYears: '2',
+    mainSkill: 'Ahli Bangunan Gedung',
     preferredLocations: ['Jakarta', 'Bandung']
   };
 
@@ -81,6 +86,152 @@ describe('TalentProfile.vue', () => {
       expect(goBackSpy).toHaveBeenCalledWith(-1);
     });
   });
+
+  // ========== BAGIAN BARU: Profile Section Tests ==========
+  describe('Profile Section', () => {
+    describe('Basic Profile Info', () => {
+      it('displays talent name correctly', () => {
+        const nameElement = wrapper.find('h2');
+        expect(nameElement.text()).toBe(mockTalent.name);
+      });
+
+      it('displays location with icon', () => {
+        const contactInfo = wrapper.find('.talent-contact-info');
+        expect(contactInfo.text()).toContain(mockTalent.location);
+      });
+
+      it('displays phone number with icon', () => {
+        const contactInfo = wrapper.find('.talent-contact-info');
+        expect(contactInfo.text()).toContain(mockTalent.phone);
+      });
+
+      it('displays level badge', () => {
+        const badges = wrapper.findAll('.badge-info');
+        expect(badges.at(0).text()).toBe(mockTalent.level);
+      });
+
+      it('displays experience years badge', () => {
+        const badges = wrapper.findAll('.badge-info');
+        expect(badges.at(1).text()).toBe(`${mockTalent.experienceYears} Tahun Pengalaman`);
+      });
+
+      it('displays main skill badge', () => {
+        const skillBadge = wrapper.find('.badge-secondary');
+        expect(skillBadge.text()).toBe(mockTalent.mainSkill);
+      });
+    });
+
+    describe('Price Estimate Section', () => {
+      it('displays price estimate label', () => {
+        const priceSection = wrapper.find('.price-estimate-card');
+        expect(priceSection.find('p').text()).toBe('Perkiraan Harga');
+      });
+
+      it('formats price correctly', () => {
+        const priceValue = wrapper.find('.price-value');
+        expect(priceValue.text()).toBe('Rp 7.550.000');
+      });
+
+      it('displays contact button with first name', () => {
+        const contactButton = wrapper.find('.price-estimate-card b-button-stub');
+        expect(contactButton.text()).toBe(`Hubungi ${mockTalent.name.split(' ')[0]}`);
+      });
+    });
+
+    describe('Edge Cases and Error Handling', () => {
+      it('handles empty talent name', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, name: '' } 
+        });
+        const nameElement = wrapper.find('h2');
+        expect(nameElement.text()).toBe('');
+      });
+
+      it('handles missing location', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, location: null } 
+        });
+        const contactInfo = wrapper.find('.talent-contact-info');
+        expect(contactInfo.text()).toContain('');
+      });
+
+      it('handles missing phone', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, phone: null } 
+        });
+        const contactInfo = wrapper.find('.talent-contact-info');
+        expect(contactInfo.text()).toContain('');
+      });
+
+      it('handles null price value', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, price: null } 
+        });
+        const priceValue = wrapper.find('.price-value');
+        expect(priceValue.text()).toBe('Rp N/A');
+      });
+
+      it('handles undefined price value', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, price: undefined } 
+        });
+        const priceValue = wrapper.find('.price-value');
+        expect(priceValue.text()).toBe('Rp N/A');
+      });
+
+      it('handles zero price value', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, price: 0 } 
+        });
+        const priceValue = wrapper.find('.price-value');
+        expect(priceValue.text()).toBe('Rp 0');
+      });
+
+      it('handles single name for contact button', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, name: 'SingleName' } 
+        });
+        const contactButton = wrapper.find('.price-estimate-card b-button-stub');
+        expect(contactButton.text()).toBe('Hubungi SingleName');
+      });
+
+      it('handles empty name for contact button', async () => {
+        await wrapper.setData({ 
+          talent: { ...mockTalent, name: '' } 
+        });
+        const contactButton = wrapper.find('.price-estimate-card b-button-stub');
+        expect(contactButton.text()).toBe('Hubungi');
+      });
+
+    });
+
+    describe('formatCurrency method', () => {
+      it('formats regular number correctly', () => {
+        expect(wrapper.vm.formatCurrency(7550000)).toBe('7.550.000');
+      });
+
+      it('handles null value', () => {
+        expect(wrapper.vm.formatCurrency(null)).toBe('N/A');
+      });
+
+      it('handles undefined value', () => {
+        expect(wrapper.vm.formatCurrency(undefined)).toBe('N/A');
+      });
+
+      it('handles zero value', () => {
+        expect(wrapper.vm.formatCurrency(0)).toBe('0');
+      });
+
+      it('handles large numbers', () => {
+        expect(wrapper.vm.formatCurrency(1234567890)).toBe('1.234.567.890');
+      });
+
+      it('handles formating number', () => {
+        expect(wrapper.vm.formatCurrency(12345)).toBe('12.345');
+      });
+    });
+  });
+  // ========== AKHIR BAGIAN BARU ==========
 
   describe('Tentang Saya Section', () => {
     it('displays about section with correct content', () => {

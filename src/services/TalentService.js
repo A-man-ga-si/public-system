@@ -39,10 +39,6 @@ const getFilterOptions = () => {
  * @param {String|Number} talentId - The ID of the talent
  * @returns {Promise} - API response
  */
-const toggleBookmark = (talentId) => {
-  return axios.post(`${apiUrlTalentPool}/talents/${talentId}/bookmark`);
-};
-
 /**
  * Mock talent data for development purposes
  * @returns {Promise} - Resolved promise with mock data

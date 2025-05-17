@@ -77,6 +77,19 @@ const routes = [
           ),
       },
       {
+        path: `talent-pool/:talentId`,
+        name: 'TalentProfile',
+        meta: {
+          title: 'Talent Profile',
+          loginRequired: false,
+          permissions: ['read-dashboard'],
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "talentprofile" */ './../views/app/talent-pool/TalentProfile.vue'
+          ),
+      },
+      {
         path: `projects`,
         name: 'Project',
         meta: {

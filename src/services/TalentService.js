@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiUrl } from '@/constants/config';
+import { apiUrlTalentPool } from '@/constants/config';
 import { hargaJasa, locations, skills } from '@/constants/filterData';
 
 /**
@@ -16,7 +16,7 @@ const getTalents = (filters = {}) => {
   }, {});
 
   // The backend endpoint is /users/contractor
-  return axios.get(`${apiUrl}/users/contractor`, {
+  return axios.get(`${apiUrlTalentPool}/users/contractor`, {
     params: formattedFilters,
     headers: {
       'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ const getTalents = (filters = {}) => {
  */
 const getFilterOptions = () => {
   // Get filter options from the API
-  return axios.get(`${apiUrl}/talents/filter-options`);
+  return axios.get(`${apiUrlTalentPool}/talents/filter-options`);
 };
 
 /**
@@ -39,10 +39,6 @@ const getFilterOptions = () => {
  * @param {String|Number} talentId - The ID of the talent
  * @returns {Promise} - API response
  */
-const toggleBookmark = (talentId) => {
-  return axios.post(`${apiUrl}/talents/${talentId}/bookmark`);
-};
-
 /**
  * Mock talent data for development purposes
  * @returns {Promise} - Resolved promise with mock data
@@ -140,5 +136,4 @@ export default {
   getFilterOptions,
   getMockTalents,
   getMockFilterOptions,
-  toggleBookmark
 };

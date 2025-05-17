@@ -252,7 +252,7 @@ export default {
         // Fetch talents from the backend
         const response = await TalentService.getTalents(params);
         this.talents = response.data.data || [];
-        console.log('Fetched talents:', response.data.data);
+        
       } catch (error) {
         console.error('Error fetching talents:', error);
         this.talents = [];

@@ -49,7 +49,7 @@ describe('UserCard.vue', () => {
     
     // Check image existence only
     expect(wrapper.find('.talent-image').exists()).toBe(true);
-    expect(wrapper.find('.talent-image').attributes('alt')).toBe('John');
+    expect(wrapper.find('.talent-image').attributes('alt')).toBe('John Doe');
   });
 
   it('handles missing user properties gracefully', () => {
@@ -75,38 +75,6 @@ describe('UserCard.vue', () => {
     expect(wrapper.find('.talent-date').exists()).toBe(false);
     expect(wrapper.find('.experience-badge').exists()).toBe(false);
     expect(wrapper.find('.specialty-badge').exists()).toBe(false);
-  });
-
-  it('calls toggleBookmark method when bookmark icon is clicked', async () => {
-    const wrapper = mount(UserCard, {
-      propsData: {
-        user: mockUser
-      }
-    });
-    
-    // Create a mock for the toggleBookmark method
-    wrapper.vm.toggleBookmark = jest.fn();
-    
-    // Trigger the click event
-    await wrapper.find('.bookmark-icon').trigger('click');
-    
-    // Verify the method was called with the correct user
-    expect(wrapper.vm.toggleBookmark).toHaveBeenCalledWith(mockUser);
-  });
-
-  it('displays bookmark icon with filled class when bookmarked is true', () => {
-    const bookmarkedUser = {
-      ...mockUser,
-      bookmarked: true
-    };
-
-    const wrapper = mount(UserCard, {
-      propsData: {
-        user: bookmarkedUser
-      }
-    });
-
-    expect(wrapper.find('.bookmark-icon i').classes()).toContain('filled');
   });
 
   it('formats price correctly', () => {

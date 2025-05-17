@@ -1,3 +1,9 @@
 export { default as IconLeftChevron } from './IconLeftChevron.vue';
 export { default as IconRightChevron } from './IconRightChevron.vue';
 export { default as IconDownChevron } from './IconDownChevron.vue';
+export { default as IconLup } from './IconLup.vue';
+export { default as IconStar } from './IconStar.vue';
+export { default as IconPdf } from './IconPdf.vue';
+export { default as IconWhatsapp } from './IconWhatsapp.vue';
+export { default as IconDownloadButton } from './IconDownloadButton.vue';
+export { default as IconLocation } from './IconLocation.vue';

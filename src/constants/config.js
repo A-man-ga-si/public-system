@@ -4,8 +4,10 @@ export const titleSuffix = ' | Yuk Mulai Hitung RAB';
 
 // URLs Related Configs
 export const apiDomain = process.env.VUE_APP_BASE_API_URL;
+export const apiDomainTalentPool = process.env.VUE_APP_BASE_API_URL_TALENT_POOL;
 
 export const apiUrl = `${apiDomain}/api`;
+export const apiUrlTalentPool = `${apiDomainTalentPool}/api`;
 export const adminRoot = '/app';
 export const searchPath = `${adminRoot}/#`;
 export const buyUrl = '#';

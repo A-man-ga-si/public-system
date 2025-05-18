@@ -124,6 +124,17 @@
         </div>
       </div>
 
+      <!-- Recommendation Component Demo -->
+      <div class="component-demo">
+        <h3 class="component-title">Recommendation Component</h3>
+        <div class="component-description">
+          <p>A component for displaying recommendations in a view-only mode.</p>
+        </div>
+        <div class="component-example">
+          <Recommendation :recommendations="sampleRecommendations" />
+        </div>
+      </div>
+
       <div class="component-demo">
         <h3 class="component-title">Disabled Buttons</h3>
         <div class="component-description">
@@ -165,6 +176,7 @@
 import SearchBar from '@/components/Common/SearchBar.vue'
 import DropdownSelect from '@/components/Common/DropdownSelect.vue'
 import Button from '@/components/Common/Button.vue'
+import Recommendation from '@/components/Common/Recommendation.vue'
 
 // Import available icons
 import IconLup from '@/assets/icons/IconLup.vue'
@@ -177,7 +189,8 @@ export default {
   components: {
     SearchBar,
     DropdownSelect,
-    Button
+    Button,
+    Recommendation
   },
   data() {
     return {
@@ -190,8 +203,32 @@ export default {
       IconRightChevron,
       IconLeftChevron,
       IconDownChevron,
-      // Click counter for demonstration
-      clickCounter: 0
+      sampleRecommendations: [
+        {
+          id: '1',
+          talentId: 'talent-001',
+          contractorId: 101,
+          contractorName: 'PT Maju Bersama',
+          message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik. Berhasil menyelesaikan proyek tepat waktu dengan hasil yang memuaskan. Memiliki inisiatif tinggi dalam menyelesaikan masalah dan mampu bekerja secara mandiri maupun dalam tim. Pemahaman teknisnya dalam bidang pengembangan perangkat lunak sangat mumpuni dan selalu mengikuti best practices dalam pengembangan. Kami sangat puas dengan hasil kerja dan profesionalisme yang ditunjukkan selama masa kontrak.',
+          status: 'ACCEPTED'
+        },
+        {
+          id: '2',
+          talentId: 'talent-001',
+          contractorId: 102,
+          contractorName: 'CV Teknologi Inovasi',
+          message: 'Memiliki etika kerja yang sangat baik dan selalu profesional dalam setiap penugasan. Kami sangat merekomendasikan untuk posisi pengembang aplikasi senior. Keahliannya dalam mendesain arsitektur sistem dan mengimplementasikan solusi yang kompleks patut diapresiasi. Selama bekerja dengan kami, telah menunjukkan dedikasi tinggi dan kemampuan adaptasi yang cepat terhadap teknologi baru. Selain itu, kemampuan komunikasi dan dokumentasinya sangat baik sehingga memudahkan proses transfer knowledge kepada anggota tim lainnya.',
+          status: 'PENDING'
+        },
+        {
+          id: '3',
+          talentId: 'talent-001',
+          contractorId: 103,
+          contractorName: 'UD Sistem Digital',
+          message: 'Pekerja yang sangat detail dan tekun. Sayangnya kurang dalam hal manajemen waktu, namun secara keseluruhan masih memberikan hasil yang baik. Memiliki pengetahuan teknis yang mendalam dan kemampuan analitis yang kuat dalam menghadapi permasalahan kompleks. Dalam proyek terakhir bersama kami, menunjukkan kreativitas dalam memberikan solusi alternatif yang efisien. Meskipun terkadang estimasi waktu tidak sesuai dengan realisasi pengerjaan, kualitas hasil akhir selalu memenuhi dan bahkan melebihi ekspektasi. Perlu pengembangan dalam aspek komunikasi dan pelaporan progres secara rutin.',
+          status: 'DECLINED'
+        }
+      ]
     }
   },
   methods: {

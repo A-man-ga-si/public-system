@@ -215,6 +215,35 @@
                 </div>
               </div>
             </div>
+
+            <!-- Recommendations Section -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Rekomendasi</h4>
+              
+              <!-- Loading Recommendations -->
+              <div v-if="recommendationsLoading" class="text-center py-3">
+                <div class="loading"></div>
+                <p class="mt-2">Memuat rekomendasi...</p>
+              </div>
+              
+              <!-- Error Recommendations -->
+              <div v-else-if="recommendationsError" class="alert alert-danger">
+                {{ recommendationsError }}
+                <button class="btn btn-sm btn-outline-primary ml-2" @click="fetchTalentRecommendations">
+                  Coba Lagi
+                </button>
+              </div>
+              
+              <!-- Empty Recommendations -->
+              <div v-else-if="acceptedRecommendations.length === 0" class="text-center py-3">
+                <p class="text-muted">Belum ada rekomendasi yang diterima.</p>
+              </div>
+              
+              <!-- Recommendations List -->
+              <div v-else>
+                <Recommendation :recommendations="acceptedRecommendations" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -228,6 +257,7 @@ import IconPdf from '@/assets/icons/IconPdf.vue';
 import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 import IconLocation from '@/assets/icons/IconLocation.vue';
 import TalentProfileService from '@/services/TalentProfileService';
+import Recommendation from '@/components/Common/Recommendation.vue';
 
 export default {
   name: 'TalentProfile',
@@ -236,6 +266,7 @@ export default {
     IconPdf,
     IconWhatsapp,
     IconLocation,
+    Recommendation,
   },
   data() {
     return {
@@ -243,14 +274,22 @@ export default {
       talent: {},
       experiences: [],
       certifications: [],
+      recommendations: [],
       loading: true,
       experiencesLoading: true,
       certificationsLoading: true,
+      recommendationsLoading: true,
       error: null,
       experiencesError: null,
       certificationsError: null,
+      recommendationsError: null,
       downloadingCert: null // Track which certificate is being downloaded
     };
+  },
+  computed: {
+    acceptedRecommendations() {
+      return this.recommendations.filter(rec => rec.status === 'ACCEPTED');
+    }
   },
   methods: {
     /**
@@ -357,6 +396,40 @@ export default {
     },
 
     /**
+     * Fetch talent recommendations from API
+     */
+    async fetchTalentRecommendations() {
+      try {
+        this.recommendationsLoading = true;
+        this.recommendationsError = null;
+        
+        // Try API first, fallback to mock in development
+        let response;
+        try {
+          response = await TalentProfileService.getTalentRecommendations(this.talentId);
+        } catch (apiError) {
+          console.warn('Recommendations API call failed, using mock data:', apiError);
+          if (process.env.NODE_ENV === 'development') {
+            response = await TalentProfileService.getMockTalentRecommendations(this.talentId);
+          } else if (apiError.response?.status === 404) {
+            // 404 is normal, means no recommendations
+            this.recommendations = [];
+            return;
+          } else {
+            throw apiError;
+          }
+        }
+        
+        this.recommendations = response.data.data || [];
+      } catch (error) {
+        console.error('Error fetching talent recommendations:', error);
+        this.recommendationsError = 'Gagal memuat data rekomendasi.';
+      } finally {
+        this.recommendationsLoading = false;
+      }
+    },
+
+    /**
      * Map API data to component format
      * Sesuai dengan response backend yang diberikan
      */
@@ -453,6 +526,7 @@ export default {
       this.fetchTalentProfile();
       this.fetchTalentExperiences();
       this.fetchTalentCertifications();
+      this.fetchTalentRecommendations();
     },
 
     formatCurrency(value) {
@@ -522,7 +596,8 @@ export default {
     await Promise.all([
       this.fetchTalentProfile(),
       this.fetchTalentExperiences(),
-      this.fetchTalentCertifications()
+      this.fetchTalentCertifications(),
+      this.fetchTalentRecommendations()
     ]);
   }
 };
@@ -915,7 +990,7 @@ h2 {
     text-align: center;
   }
   
-  .talent-contact-info span.ml-3 {
+  .talent-contact_info span.ml-3 {
     margin-left: 0 !important;
     margin-top: 8px;
   }

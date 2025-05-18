@@ -94,6 +94,8 @@ describe('TalentProfile.vue', () => {
       }
     });
     
+    const toastMock = jest.fn();
+    
     wrapper = shallowMount(TalentProfile, {
       localVue,
       router,
@@ -101,7 +103,7 @@ describe('TalentProfile.vue', () => {
         $route: { params: { talentId: '123' } },
         $t: key => key,
         $bvToast: {
-          toast: jest.fn()
+          toast: toastMock
         }
       },
       stubs: ['router-link', 'b-button', 'IconLeftChevron', 'IconWhatsapp', 'IconLocation', 'IconPdf']
@@ -219,6 +221,138 @@ describe('TalentProfile.vue', () => {
       expect(wrapper.vm.formatLocationType('ON_SITE')).toBe('On-site');
       expect(wrapper.vm.formatLocationType('REMOTE')).toBe('Remote');
       expect(wrapper.vm.formatLocationType('HYBRID')).toBe('Hybrid');
+    });
+  });
+
+  describe('WhatsApp Functionality', () => {
+    let originalWindowOpen;
+    
+    beforeEach(() => {
+      // Save original window.open
+      originalWindowOpen = window.open;
+      // Mock window.open function
+      window.open = jest.fn();
+    });
+    
+    afterEach(() => {
+      // Restore original window.open
+      window.open = originalWindowOpen;
+    });
+    
+    it('displays toast if phone number is not available', async () => {
+      const toastSpy = jest.spyOn(wrapper.vm.$bvToast, 'toast');
+      
+      // Set phone number to null/empty
+      await wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if toast was called
+      expect(toastSpy).toHaveBeenCalled();
+      
+      // Verify window.open wasn't called
+      expect(window.open).not.toHaveBeenCalled();
+      
+      toastSpy.mockRestore();
+    });
+    
+    it('formats a number starting with 0 correctly for WhatsApp', () => {
+      // Set phone with leading 0
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '081234567890', name: 'John Doe' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if window.open was called with correctly formatted number (+62...)
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('https://wa.me/+6281234567890'),
+        '_blank'
+      );
+    });
+    
+    it('formats a number without prefix correctly for WhatsApp', () => {
+      // Set phone without any prefix
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '81234567890', name: 'John Doe' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if window.open was called with correctly formatted number (+62...)
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('https://wa.me/+6281234567890'),
+        '_blank'
+      );
+    });
+    
+    it('formats a number starting with 62 correctly for WhatsApp', () => {
+      // Set phone starting with 62
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '6281234567890', name: 'John Doe' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if window.open was called with correctly formatted number (+62...)
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('https://wa.me/+6281234567890'),
+        '_blank'
+      );
+    });
+    
+    it('keeps a number already formatted with + unchanged', () => {
+      // Set phone already with +
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '+6281234567890', name: 'John Doe' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if window.open was called with correctly formatted number (unchanged)
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('https://wa.me/+6281234567890'),
+        '_blank'
+      );
+    });
+    
+    it('includes the talent name in the WhatsApp message', () => {
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '081234567890', name: 'Jane Smith' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if message contains the talent name
+      const expectedMessagePart = encodeURIComponent('Halo Jane Smith');
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining(expectedMessagePart),
+        '_blank'
+      );
+    });
+    
+    it('removes spaces from phone numbers', () => {
+      // Set phone with spaces
+      wrapper.setData({
+        talent: { ...wrapper.vm.talent, phone: '0812 3456 7890', name: 'John Doe' }
+      });
+      
+      // Call the method
+      wrapper.vm.openWhatsApp();
+      
+      // Check if window.open was called with correctly formatted number (+62...)
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('https://wa.me/+6281234567890'),
+        '_blank'
+      );
     });
   });
 });

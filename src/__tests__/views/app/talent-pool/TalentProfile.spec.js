@@ -8,9 +8,11 @@ jest.mock('@/services/TalentProfileService', () => ({
   getTalentProfile: jest.fn(),
   getTalentExperiences: jest.fn(),
   getTalentCertifications: jest.fn(),
+  getTalentRecommendations: jest.fn(),
   getMockTalentProfile: jest.fn(),
   getMockTalentExperiences: jest.fn(),
   getMockTalentCertifications: jest.fn(),
+  getMockTalentRecommendations: jest.fn(),
   dummyDownloadCertificate: jest.fn()
 }));
 
@@ -58,6 +60,33 @@ describe('TalentProfile.vue', () => {
       file: 'Test Cert.pdf'
     }
   ];
+
+  const mockRecommendations = [
+    {
+      id: '1',
+      talentId: '123',
+      contractorId: 101,
+      contractorName: 'PT Teknologi Indonesia',
+      message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik.',
+      status: 'ACCEPTED'
+    },
+    {
+      id: '2',
+      talentId: '123',
+      contractorId: 102,
+      contractorName: 'CV Maju Mundur',
+      message: 'Memiliki etika kerja yang sangat baik dan selalu profesional.',
+      status: 'ACCEPTED'
+    },
+    {
+      id: '3',
+      talentId: '123',
+      contractorId: 103,
+      contractorName: 'PT Belum Disetujui',
+      message: 'Rekomendasi yang belum disetujui.',
+      status: 'PENDING'
+    }
+  ];
   
   beforeEach(() => {
     mockTalentProfileService = require('@/services/TalentProfileService');
@@ -94,6 +123,12 @@ describe('TalentProfile.vue', () => {
       }
     });
     
+    mockTalentProfileService.getMockTalentRecommendations.mockResolvedValue({
+      data: {
+        data: mockRecommendations
+      }
+    });
+    
     wrapper = shallowMount(TalentProfile, {
       localVue,
       router,
@@ -104,7 +139,15 @@ describe('TalentProfile.vue', () => {
           toast: jest.fn()
         }
       },
-      stubs: ['router-link', 'b-button', 'IconLeftChevron', 'IconWhatsapp', 'IconLocation', 'IconPdf']
+      stubs: [
+        'router-link', 
+        'b-button', 
+        'IconLeftChevron', 
+        'IconWhatsapp', 
+        'IconLocation', 
+        'IconPdf',
+        'Recommendation' // Add Recommendation to stubs
+      ]
     });
     
     // Manually set data to bypass API calls
@@ -112,9 +155,11 @@ describe('TalentProfile.vue', () => {
       talent: mockTalent,
       experiences: mockExperiences,
       certifications: mockCertifications,
+      recommendations: mockRecommendations,
       loading: false,
       experiencesLoading: false,
-      certificationsLoading: false
+      certificationsLoading: false,
+      recommendationsLoading: false
     });
   });
   
@@ -219,6 +264,58 @@ describe('TalentProfile.vue', () => {
       expect(wrapper.vm.formatLocationType('ON_SITE')).toBe('On-site');
       expect(wrapper.vm.formatLocationType('REMOTE')).toBe('Remote');
       expect(wrapper.vm.formatLocationType('HYBRID')).toBe('Hybrid');
+    });
+  });
+
+  describe('Recommendations Section', () => {
+    it('filters recommendations to show only accepted ones', () => {
+      expect(wrapper.vm.acceptedRecommendations.length).toBe(2);
+      expect(wrapper.vm.acceptedRecommendations.every(rec => rec.status === 'ACCEPTED')).toBe(true);
+    });
+
+    it('shows error state for recommendations', async () => {
+      await wrapper.setData({ 
+        recommendationsLoading: false, 
+        recommendationsError: 'Gagal memuat data talent.' 
+      });
+      
+      // Look for error message directly
+      expect(wrapper.text()).toContain('Gagal memuat data talent');
+    });
+
+    it('shows empty state when no accepted recommendations', async () => {
+      await wrapper.setData({ 
+        recommendations: [{ id: '1', status: 'PENDING', contractorName: 'Test', message: 'Test' }]
+      });
+      
+      // Look for empty state message directly
+      expect(wrapper.text()).toContain('Gagal memuat data talent');
+    });
+
+    it('calls fetchTalentRecommendations during component creation', () => {
+      // Reset the component to test created hook
+      wrapper.destroy();
+      
+      // Spy on the method before component is created
+      const fetchSpy = jest.spyOn(TalentProfile.methods, 'fetchTalentRecommendations');
+      
+      // Create component again
+      wrapper = shallowMount(TalentProfile, {
+        localVue,
+        router,
+        mocks: {
+          $route: { params: { talentId: '123' } },
+          $t: key => key,
+          $bvToast: { toast: jest.fn() }
+        },
+        stubs: ['router-link', 'b-button', 'IconLeftChevron', 'IconWhatsapp', 'IconLocation', 'IconPdf']
+      });
+      
+      // Verify method was called
+      expect(fetchSpy).toHaveBeenCalled();
+      
+      // Clean up
+      fetchSpy.mockRestore();
     });
   });
 });

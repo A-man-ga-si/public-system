@@ -1,6 +1,5 @@
 <template>
   <div class="recommendation-container">
-    <p class="recommendation-title">Rekomendasi</p>
 
     <div v-if="recommendations && recommendations.length > 0" class="recommendation-list">
       <div 

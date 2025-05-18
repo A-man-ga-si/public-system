@@ -80,8 +80,8 @@
                   <p class="mb-2">Perkiraan Harga</p>
                   <h3 class="price-value">Rp {{ formatCurrency(talent.price) }}</h3>
                 </div>
-                <b-button variant="primary" size="lg" class="d-flex align-items-center">
-                  Hubungi {{ talent.name ? talent.name.split(' ')[0] : '' }}
+                <b-button variant="primary" size="lg" class="d-flex align-items-center" @click="openWhatsApp">
+                   Hubungi {{ talent.name ? talent.name.split(' ')[0] : '' }}
                 </b-button>
               </div>
             </div>
@@ -440,6 +440,40 @@ export default {
       } finally {
         this.downloadingCert = null;
       }
+    },
+
+    /**
+     * Opens WhatsApp with the talent's phone number
+     */
+    openWhatsApp() {
+      if (!this.talent.phone) {
+        this.$bvToast.toast('Nomor telepon tidak tersedia', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+        return;
+      }
+    
+      // Format phone number (remove spaces, ensure it starts with country code)
+      let phoneNumber = this.talent.phone.replace(/\s+/g, '');
+      if (!phoneNumber.startsWith('+')) {
+        // If doesn't start with +, ensure it starts with country code for Indonesia
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = '+62' + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith('62')) {
+          phoneNumber = '+62' + phoneNumber;
+        } else {
+          phoneNumber = '+' + phoneNumber;
+        }
+      }
+    
+      // Create WhatsApp URL with predefined message
+      const message = encodeURIComponent(`Halo ${this.talent.name}, saya melihat profil Anda di Rencanakan.id dan tertarik dengan keahlian Anda.`);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      
+      // Open in new tab
+      window.open(whatsappUrl, '_blank');
     },
 
     /**

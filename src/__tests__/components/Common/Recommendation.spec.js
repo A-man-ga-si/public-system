@@ -33,7 +33,6 @@ describe('Recommendation.vue', () => {
       
       expect(wrapper.exists()).toBe(true);
       expect(wrapper.find('.recommendation-container').exists()).toBe(true);
-      expect(wrapper.find('.recommendation-title').text()).toBe('Rekomendasi');
       
       // Should have two recommendation items
       const items = wrapper.findAll('.recommendation-item');

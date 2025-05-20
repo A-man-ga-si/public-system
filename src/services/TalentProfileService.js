@@ -95,6 +95,36 @@ const getTalentRecommendations = (talentId) => {
 };
 
 /**
+ * Create a recommendation for a talent
+ * Endpoint: POST /recommendations/contractor/{talentId}
+ * @param {String} talentId - The ID of the talent
+ * @param {Object} recommendation - The recommendation data
+ * @returns {Promise} - API response
+ */
+const createRecommendation = (talentId, recommendation) => {
+  return axios.post(`${apiUrlTalentPool}/recommendations/user/contractor/${talentId}`, recommendation, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+/**
+ * Delete a recommendation
+ * Endpoint: DELETE /recommendations/{recommendationId}
+ * @param {String} recommendationId - The ID of the recommendation to delete
+ * @returns {Promise} - API response
+ */
+const deleteRecommendation = (recommendationId) => {
+  return axios.delete(`${apiUrlTalentPool}/recommendations/${recommendationId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+
+/**
  * Mock talent profile data untuk development - Sesuai format backend response
  */
 const getMockTalentProfile = (talentId) => {
@@ -251,5 +281,7 @@ export default {
   getMockTalentExperiences,
   getMockTalentCertifications,
   getTalentRecommendations,
-  getMockTalentRecommendations
+  getMockTalentRecommendations,
+  createRecommendation,
+  deleteRecommendation
 };

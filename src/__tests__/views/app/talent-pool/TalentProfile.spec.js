@@ -363,6 +363,17 @@ describe('TalentProfile.vue', () => {
 
   describe('Recommendation Form Submission', () => {
     beforeEach(() => {
+      // Mock getCurrentUser utility
+      jest.mock('@/utils', () => ({
+        getCurrentUser: jest.fn().mockReturnValue({
+          id: 104,
+          title: 'Test User',
+          _active_company: {
+            name: 'PT Testing Company'
+          }
+        })
+      }));
+      
       // Make sure the isFormValid property is manually added if not in the component
       if (wrapper.vm.isFormValid === undefined) {
         Object.defineProperty(wrapper.vm, 'isFormValid', {
@@ -374,27 +385,32 @@ describe('TalentProfile.vue', () => {
         });
       }
       
-      // Set empty recommendation initial state if needed
-      if (!wrapper.vm.newRecommendation) {
-        wrapper.setData({
-          newRecommendation: {
-            contractorId: null,
-            contractorName: '',
-            message: '',
-            status: 'PENDING'
-          },
-          isSubmitting: false,
-          showSuccessAlert: false
-        });
-      }
+      // Set recommendation initial state with current user data
+      wrapper.setData({
+        currentUser: {
+          id: 104,
+          title: 'Test User',
+          _active_company: {
+            name: 'PT Testing Company'
+          }
+        },
+        newRecommendation: {
+          contractorId: 104,
+          contractorName: 'PT Testing Company',
+          message: '',
+          status: 'PENDING'
+        },
+        isSubmitting: false,
+        showSuccessAlert: false
+      });
     });
     
-    it('validates form with empty fields', () => {
-      // Initial state of form should be invalid with empty fields
+    it('validates form with empty message field', () => {
+      // Form should be invalid with empty message even when contractorId is auto-filled
       wrapper.setData({
         newRecommendation: {
-          contractorId: null,
-          contractorName: '',
+          contractorId: 104,
+          contractorName: 'PT Testing Company',
           message: '',
           status: 'PENDING'
         }
@@ -456,19 +472,25 @@ describe('TalentProfile.vue', () => {
       Date.now = originalDateNow;
     });
     
-    it('handles validation errors for empty fields by preventing submission', async () => {
+    it('handles validation errors for empty message field by preventing submission', async () => {
       // Spy on the bvToast.toast method
       const toastSpy = jest.spyOn(wrapper.vm.$bvToast, 'toast');
       
-      // Set empty form data
+      // Set empty message field but with auto-populated user data
       await wrapper.setData({
+        currentUser: {
+          id: 104,
+          title: 'Test User',
+          _active_company: {
+            name: 'PT Testing Company'
+          }
+        },
         newRecommendation: {
-          contractorId: null,
-          contractorName: '',
+          contractorId: 104,
+          contractorName: 'PT Testing Company',
           message: '',
           status: 'PENDING'
-        },
-        isFormValid: false
+        }
       });
       
       // Directly call the submitRecommendation method
@@ -482,6 +504,37 @@ describe('TalentProfile.vue', () => {
         'Mohon lengkapi semua field yang wajib diisi',
         expect.objectContaining({
           title: 'Validasi Gagal',
+          variant: 'warning'
+        })
+      );
+    });
+    
+    it('handles case when user is not logged in', async () => {
+      // Spy on the bvToast.toast method
+      const toastSpy = jest.spyOn(wrapper.vm.$bvToast, 'toast');
+      
+      // Set currentUser to null to simulate no logged in user
+      await wrapper.setData({
+        currentUser: null,
+        newRecommendation: {
+          contractorId: null,
+          contractorName: '',
+          message: 'Test message',
+          status: 'PENDING'
+        }
+      });
+      
+      // Directly call the submitRecommendation method
+      await wrapper.vm.submitRecommendation();
+      
+      // API should not be called when user is not logged in
+      expect(mockTalentProfileService.createRecommendation).not.toHaveBeenCalled();
+      
+      // Verify toast was called with login required message
+      expect(toastSpy).toHaveBeenCalledWith(
+        'Anda harus login untuk mengirim rekomendasi',
+        expect.objectContaining({
+          title: 'Login Diperlukan',
           variant: 'warning'
         })
       );

@@ -220,17 +220,15 @@
               <h4 class="section-title">Tambah Rekomendasi</h4>
               
               <form @submit.prevent="submitRecommendation" class="recommendation-form">
-                <div class="form-group">
-                  <label for="contractorId">ID Kontraktor <span class="text-danger">*</span></label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="contractorId"
-                    v-model="newRecommendation.contractorId"
-                    placeholder="Masukkan ID kontraktor"
-                    required
-                  >
-                  <small class="form-text text-muted">ID kontraktor diperlukan untuk mengidentifikasi pengirim rekomendasi.</small>
+                <div v-if="isUserLoggedIn" class="alert alert-info">
+                  <small>
+                    Mengirim rekomendasi sebagai: <strong>{{ newRecommendation.contractorName }}</strong>
+                  </small>
+                </div>
+                <div v-else class="alert alert-warning">
+                  <small>
+                    Anda harus login untuk mengirim rekomendasi
+                  </small>
                 </div>
 
                 <div class="form-group">
@@ -348,6 +346,7 @@ import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 import IconLocation from '@/assets/icons/IconLocation.vue';
 import TalentProfileService from '@/services/TalentProfileService';
 import Recommendation from '@/components/Common/Recommendation.vue';
+import { getCurrentUser } from '@/utils';
 
 export default {
   name: 'TalentProfile',
@@ -359,6 +358,7 @@ export default {
     Recommendation,
   },
   data() {
+    const currentUser = getCurrentUser();
     return {
       talentId: this.$route.params.talentId,
       talent: {},
@@ -374,13 +374,14 @@ export default {
       certificationsError: null,
       recommendationsError: null,
       downloadingCert: null,
+      currentUser: currentUser,
       newRecommendation: {
-        contractorId: null,
-        contractorName: '',
+        contractorId: currentUser ? currentUser.id : null,
+        contractorName: currentUser ? currentUser._active_company?.name || currentUser.title : '',
         message: '',
         status: 'PENDING'
       },
-      issubmitting: false,
+      isSubmitting: false,
       showSuccessAlert: false
     };
   },
@@ -409,6 +410,11 @@ export default {
       return this.newRecommendation.contractorId && 
             this.newRecommendation.contractorName.trim() !== '' &&
             this.newRecommendation.message.trim() !== '';
+    },
+    
+    // Check if user is logged in
+    isUserLoggedIn() {
+      return !!this.currentUser;
     }
   },
   methods: {
@@ -560,6 +566,16 @@ export default {
       try {
         this.isSubmitting = true;
         
+        // Check if user is logged in
+        if (!this.isUserLoggedIn) {
+          this.$bvToast.toast('Anda harus login untuk mengirim rekomendasi', {
+            title: 'Login Diperlukan',
+            variant: 'warning',
+            solid: true
+          });
+          return;
+        }
+        
         // Validasi form sebelum submit
         if (!this.isFormValid) {
           this.$bvToast.toast('Mohon lengkapi semua field yang wajib diisi', {
@@ -572,13 +588,19 @@ export default {
         
         // Prepare the request data sesuai dengan DTO
         const recommendationData = {
-          contractorId: parseInt(this.newRecommendation.contractorId),
+          contractorId: parseInt(this.currentUser.id), // Use logged-in user's ID
           contractorName: this.newRecommendation.contractorName,
           message: this.newRecommendation.message,
           status: 'PENDING' // Default status untuk rekomendasi baru
         };
         
-        // Call the API
+        // Call the API with talentId (recipient) and recommendation data (which includes contractorId/sender)
+        console.log('Creating recommendation:', {
+          talentId: this.talentId,
+          currentUserId: this.currentUser.id,
+          recommendationData
+        });
+        
         const response = await TalentProfileService.createRecommendation(this.talentId, recommendationData);
         
         // Tambahkan rekomendasi yang baru ke daftar rekomendasi (optimistic update)
@@ -596,10 +618,10 @@ export default {
           });
         }
         
-        // Reset form after successful submission
+        // Reset form after successful submission but preserve the user ID
         this.newRecommendation = {
-          contractorId: null,
-          contractorName: '',
+          contractorId: this.currentUser.id, // Keep the current user ID
+          contractorName: this.currentUser ? this.currentUser._active_company?.name || this.currentUser.title : '',
           message: '',
           status: 'PENDING'
         };

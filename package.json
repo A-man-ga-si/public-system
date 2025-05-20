@@ -19,7 +19,6 @@
     "moment": "^2.30.1",
     "notiflix": "^3.0.1",
     "pace-js": "^1.2.4",
-    "phosphor-vue": "git+https://davidmahbubi@bitbucket.org/flying-doge/phosphor-vue.git",
     "rencanakan-id-app-frontend": "file:",
     "roman-numerals": "^0.3.2",
     "sass": "^1.87.0",

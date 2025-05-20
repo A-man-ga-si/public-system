@@ -336,4 +336,56 @@ describe('TalentProfileService', () => {
       expect(result).toEqual(malformedResponse);
     });
   });
+  describe('createRecommendation', () => {
+    it('should call axios with correct endpoint and data', async () => {
+      const mockResponse = { 
+        data: { 
+          data: {
+            id: '1',
+            talentId: '123',
+            contractorId: 101,
+            contractorName: 'PT Teknologi Indonesia',
+            message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik.',
+            status: 'PENDING'
+          },
+          errors: null
+        } 
+      };
+      
+      const recommendationData = {
+        contractorId: 101,
+        contractorName: 'PT Teknologi Indonesia',
+        message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik.'
+      };
+      
+      mockedAxios.post.mockResolvedValue(mockResponse);
+
+      const result = await TalentProfileService.createRecommendation('123', recommendationData);
+
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        `${apiUrlTalentPool}/recommendations/user/contractor/123`, 
+        recommendationData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle API errors', async () => {
+      const mockError = new Error('API Error');
+      mockedAxios.post.mockRejectedValue(mockError);
+
+      const recommendationData = {
+        contractorId: 101,
+        contractorName: 'PT Teknologi Indonesia',
+        message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik.'
+      };
+
+      await expect(TalentProfileService.createRecommendation('123', recommendationData)).rejects.toThrow('API Error');
+    });
+  });
 });

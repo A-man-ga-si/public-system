@@ -6,8 +6,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "deploy": "vue-cli-service build && scp -P 65002 -r dist/* n1808972@194.163.41.144:www/rencanakan_id_app/frontend",
-    "deploy-beta": "vue-cli-service build --mode=beta && scp -P 65002 -r dist/* n1808972@194.163.41.144:www/rencanakan_id_app/beta",
+    "build": "vue-cli-service build",
     "test": "jest --coverage"
   },
   "dependencies": {

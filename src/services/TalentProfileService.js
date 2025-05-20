@@ -81,6 +81,50 @@ const dummyDownloadCertificate = (certificate) => {
 };
 
 /**
+ * Get talent recommendations from API
+ * @param {string} talentId - The ID of the talent
+ * @returns {Promise} - API response
+ */
+const getTalentRecommendations = (talentId) => {
+  return axios.get(`${apiUrlTalentPool}/recommendations/user/contractor/${talentId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+
+/**
+ * Create a recommendation for a talent
+ * Endpoint: POST /recommendations/contractor/{talentId}
+ * @param {String} talentId - The ID of the talent
+ * @param {Object} recommendation - The recommendation data
+ * @returns {Promise} - API response
+ */
+const createRecommendation = (talentId, recommendation) => {
+  return axios.post(`${apiUrlTalentPool}/recommendations/user/contractor/${talentId}`, recommendation, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+/**
+ * Delete a recommendation
+ * Endpoint: DELETE /recommendations/{recommendationId}
+ * @param {String} recommendationId - The ID of the recommendation to delete
+ * @returns {Promise} - API response
+ */
+const deleteRecommendation = (recommendationId) => {
+  return axios.delete(`${apiUrlTalentPool}/recommendations/${recommendationId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+};
+
+/**
  * Mock talent profile data untuk development - Sesuai format backend response
  */
 const getMockTalentProfile = (talentId) => {
@@ -180,6 +224,54 @@ const getMockTalentCertifications = (talentId) => {
   });
 };
 
+/**
+ * Mock talent recommendations data untuk development - Sesuai format backend response
+ */
+const getMockTalentRecommendations = (talentId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: {
+          data: [
+            {
+              id: '1',
+              talentId: talentId,
+              contractorId: 101,
+              contractorName: 'PT Teknologi Indonesia',
+              message: 'Sangat terampil dalam komunikasi dan memiliki kemampuan teknis yang baik. Berhasil menyelesaikan proyek tepat waktu dengan hasil yang memuaskan.',
+              status: 'ACCEPTED'
+            },
+            {
+              id: '2',
+              talentId: talentId,
+              contractorId: 102,
+              contractorName: 'CV Maju Mundur',
+              message: 'Memiliki etika kerja yang sangat baik dan selalu profesional dalam setiap penugasan. Kami sangat merekomendasikan untuk posisi pengembang aplikasi senior.',
+              status: 'ACCEPTED'
+            },
+            {
+              id: '3',
+              talentId: talentId,
+              contractorId: 103,
+              contractorName: 'PT Belum Disetujui',
+              message: 'Rekomendasi yang belum disetujui oleh talent.',
+              status: 'PENDING'
+            },
+            {
+              id: '4',
+              talentId: talentId,
+              contractorId: 104,
+              contractorName: 'CV Ditolak Saja',
+              message: 'Rekomendasi yang ditolak oleh talent.',
+              status: 'DECLINED'
+            }
+          ]
+        }
+      });
+    }, 800);
+  });
+};
+
 export default {
   getTalentProfile,
   getTalentExperiences,
@@ -187,5 +279,9 @@ export default {
   dummyDownloadCertificate,
   getMockTalentProfile,
   getMockTalentExperiences,
-  getMockTalentCertifications
+  getMockTalentCertifications,
+  getTalentRecommendations,
+  getMockTalentRecommendations,
+  createRecommendation,
+  deleteRecommendation
 };

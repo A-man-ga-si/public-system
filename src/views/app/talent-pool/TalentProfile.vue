@@ -215,6 +215,125 @@
                 </div>
               </div>
             </div>
+            <!-- Add Recommendation Form -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Tambah Rekomendasi</h4>
+              
+              <form @submit.prevent="submitRecommendation" class="recommendation-form">
+                <div class="form-group">
+                  <label for="contractorId">ID Kontraktor <span class="text-danger">*</span></label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="contractorId"
+                    v-model="newRecommendation.contractorId"
+                    placeholder="Masukkan ID kontraktor"
+                    required
+                  >
+                  <small class="form-text text-muted">ID kontraktor diperlukan untuk mengidentifikasi pengirim rekomendasi.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="contractorName">Nama Perusahaan / Kontraktor <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="contractorName"
+                    v-model="newRecommendation.contractorName"
+                    placeholder="Masukkan nama perusahaan/kontraktor"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="message">Pesan Rekomendasi <span class="text-danger">*</span></label>
+                  <textarea
+                    class="form-control"
+                    id="message"
+                    v-model="newRecommendation.message"
+                    placeholder="Tulis pesan rekomendasi untuk talent ini"
+                    rows="4"
+                    maxlength="4000"
+                    required
+                  ></textarea>
+                  <small class="form-text text-muted">{{ newRecommendation.message.length }}/4000 karakter</small>
+                </div>
+
+                <div class="text-right">
+                  <b-button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    :disabled="isSubmitting || !isFormValid"
+                  >
+                    <div v-if="isSubmitting" class="loading-small mr-1"></div>
+                    <span>{{ isSubmitting ? 'Mengirim...' : 'Kirim Rekomendasi' }}</span>
+                  </b-button>
+                </div>
+              </form>
+
+              <!-- Success Message -->
+              <b-alert
+                variant="success"
+                :show="showSuccessAlert"
+                dismissible
+                @dismissed="showSuccessAlert = false"
+                class="mt-3"
+              >
+                Rekomendasi berhasil dikirim dan menunggu persetujuan dari talent.
+              </b-alert>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="section-card mb-4">
+              <h4 class="section-title">Rekomendasi</h4>
+              
+              <!-- Loading Recommendations -->
+              <div v-if="recommendationsLoading" class="text-center py-3">
+                <div class="loading"></div>
+                <p class="mt-2">Memuat rekomendasi...</p>
+              </div>
+              
+              <!-- Error Recommendations -->
+              <div v-else-if="recommendationsError" class="alert alert-danger">
+                {{ recommendationsError }}
+                <button class="btn btn-sm btn-outline-primary ml-2" @click="fetchTalentRecommendations">
+                  Coba Lagi
+                </button>
+              </div>
+              
+              <!-- Empty Recommendations -->
+              <div v-else-if="!hasAnyRecommendations" class="text-center py-3">
+                <p class="text-muted">Belum ada rekomendasi untuk talent ini.</p>
+              </div>
+              
+              <!-- Recommendations List -->
+              <div v-else>
+                <!-- Accepted Recommendations -->
+                <div v-if="groupedRecommendations.accepted.length > 0">
+                  <Recommendation :recommendations="acceptedRecommendations" />
+                </div>
+                
+                <!-- Pending Recommendations -->
+                <div v-if="groupedRecommendations.pending.length > 0" class="mt-4">
+                  <h5 class="recommendation-subtitle">Menunggu Persetujuan Talent</h5>
+                  <div class="pending-recommendations">
+                    <div v-for="rec in groupedRecommendations.pending" :key="rec.id" class="pending-recommendation-item">
+                      <div class="recommendation-header">
+                        <div class="d-flex align-items-center">
+                          <div class="recommendation-source">
+                            <h6 class="mb-1">{{ rec.contractorName }}</h6>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="recommendation-content mt-2 text-muted">
+                        <p>{{ rec.message }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -228,6 +347,7 @@ import IconPdf from '@/assets/icons/IconPdf.vue';
 import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 import IconLocation from '@/assets/icons/IconLocation.vue';
 import TalentProfileService from '@/services/TalentProfileService';
+import Recommendation from '@/components/Common/Recommendation.vue';
 
 export default {
   name: 'TalentProfile',
@@ -236,6 +356,7 @@ export default {
     IconPdf,
     IconWhatsapp,
     IconLocation,
+    Recommendation,
   },
   data() {
     return {
@@ -243,14 +364,52 @@ export default {
       talent: {},
       experiences: [],
       certifications: [],
+      recommendations: [],
       loading: true,
       experiencesLoading: true,
       certificationsLoading: true,
+      recommendationsLoading: true,
       error: null,
       experiencesError: null,
       certificationsError: null,
-      downloadingCert: null // Track which certificate is being downloaded
+      recommendationsError: null,
+      downloadingCert: null,
+      newRecommendation: {
+        contractorId: null,
+        contractorName: '',
+        message: '',
+        status: 'PENDING'
+      },
+      issubmitting: false,
+      showSuccessAlert: false
     };
+  },
+  computed: {
+    acceptedRecommendations() {
+      return this.recommendations.filter(rec => rec.status === 'ACCEPTED');
+    },
+    
+    // Tambahkan computed property untuk mengelompokkan rekomendasi berdasarkan status
+    groupedRecommendations() {
+      const accepted = this.recommendations.filter(rec => rec.status === 'ACCEPTED');
+      const pending = this.recommendations.filter(rec => rec.status === 'PENDING');
+      
+      return {
+        accepted,
+        pending
+      };
+    },
+    
+    // Periksa apakah ada rekomendasi (baik accepted atau pending)
+    hasAnyRecommendations() {
+      return this.recommendations.length > 0;
+    },
+    // New computed property for form validation
+    isFormValid() {
+      return this.newRecommendation.contractorId && 
+            this.newRecommendation.contractorName.trim() !== '' &&
+            this.newRecommendation.message.trim() !== '';
+    }
   },
   methods: {
     /**
@@ -353,6 +512,131 @@ export default {
         this.certificationsError = 'Gagal memuat data sertifikasi.';
       } finally {
         this.certificationsLoading = false;
+      }
+    },
+
+    /**
+     * Fetch talent recommendations from API
+     */
+    async fetchTalentRecommendations() {
+      try {
+        this.recommendationsLoading = true;
+        this.recommendationsError = null;
+        
+        // Try API first, fallback to mock in development
+        let response;
+        try {
+          response = await TalentProfileService.getTalentRecommendations(this.talentId);
+          console.log("ini apa jir",response);
+        } catch (apiError) {
+          console.warn('Recommendations API call failed, using mock data:', apiError);
+          if (apiError.response?.status === 404) {
+            this.recommendations = [];
+            return;
+          } else if (process.env.NODE_ENV === 'development') {  
+            // console.log(process.env.NODE_ENV);
+            response = await TalentProfileService.getMockTalentRecommendations(this.talentId);
+          } 
+          else {
+            throw apiError;
+          }
+        }
+        
+        this.recommendations = response.data.data || [];
+        console.log("ini apa jir",this.recommendations);
+      } catch (error) {
+        console.error('Error fetching talent recommendations:', error);
+        this.recommendationsError = 'Gagal memuat data rekomendasi.';
+      } finally {
+        this.recommendationsLoading = false;
+      }
+    },
+    // Perbarui metode submitRecommendation
+
+    /**
+     * Submit new recommendation
+     */
+    async submitRecommendation() {
+      try {
+        this.isSubmitting = true;
+        
+        // Validasi form sebelum submit
+        if (!this.isFormValid) {
+          this.$bvToast.toast('Mohon lengkapi semua field yang wajib diisi', {
+            title: 'Validasi Gagal',
+            variant: 'warning',
+            solid: true
+          });
+          return;
+        }
+        
+        // Prepare the request data sesuai dengan DTO
+        const recommendationData = {
+          contractorId: parseInt(this.newRecommendation.contractorId),
+          contractorName: this.newRecommendation.contractorName,
+          message: this.newRecommendation.message,
+          status: 'PENDING' // Default status untuk rekomendasi baru
+        };
+        
+        // Call the API
+        const response = await TalentProfileService.createRecommendation(this.talentId, recommendationData);
+        
+        // Tambahkan rekomendasi yang baru ke daftar rekomendasi (optimistic update)
+        // Jika response berhasil, gunakan data dari response
+        if (response && response.data && response.data.data) {
+          this.recommendations.push(response.data.data);
+        } 
+        // Jika tidak, buat objek baru berdasarkan input pengguna
+        else {
+          const tempId = 'temp-' + Date.now();
+          this.recommendations.push({
+            id: tempId,
+            ...recommendationData,
+            createdDate: new Date().toISOString()
+          });
+        }
+        
+        // Reset form after successful submission
+        this.newRecommendation = {
+          contractorId: null,
+          contractorName: '',
+          message: '',
+          status: 'PENDING'
+        };
+        
+        // Show success message
+        this.showSuccessAlert = true;
+        
+      } catch (error) {
+        console.error('Error creating recommendation:', error);
+        
+        // Show detailed error message
+        let errorMessage = 'Gagal mengirim rekomendasi.';
+        
+        if (error.response) {
+          console.log('Status:', error.response.status);
+          console.log('Headers:', error.response.headers);
+          console.log('Data:', error.response.data);
+          
+          if (error.response.status === 403) {
+            errorMessage = 'Anda tidak memiliki izin untuk mengirim rekomendasi (Error 403)';
+          } else if (error.response.status === 400) {
+            errorMessage = 'Data rekomendasi tidak valid. Mohon periksa kembali.';
+            if (error.response?.data?.errors) {
+              errorMessage = error.response.data.errors;
+            }
+          } else if (error.response?.data?.errors) {
+            errorMessage = error.response.data.errors;
+          }
+        }
+        
+        this.$bvToast.toast(errorMessage, {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      } finally {
+        this.isSubmitting = false;
       }
     },
 
@@ -487,6 +771,7 @@ export default {
       this.fetchTalentProfile();
       this.fetchTalentExperiences();
       this.fetchTalentCertifications();
+      this.fetchTalentRecommendations();
     },
 
     formatCurrency(value) {
@@ -556,7 +841,8 @@ export default {
     await Promise.all([
       this.fetchTalentProfile(),
       this.fetchTalentExperiences(),
-      this.fetchTalentCertifications()
+      this.fetchTalentCertifications(),
+      this.fetchTalentRecommendations()
     ]);
   }
 };
@@ -791,7 +1077,7 @@ h2 {
 
 /* Mengatur ukuran dan style logo */
 .company-logo {
-  width: 64px; /* Ukuran logo - sesuaikan jika diperlukan */
+  width: 64px;
   height: 64px;
   border-radius: 4px;
   background-color: #F0F0F0;
@@ -895,6 +1181,128 @@ h2 {
   margin-bottom: 4px !important; /* Kurangi margin antar baris */
 }
 
+/* Form styles */
+.form-control {
+  border: 1px solid var(--Colors-Colors-Base-Light-Gray, #ECEDEE);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: var(--Colors-Colors-Brand-Sea-Blue-Sea-Blue---300, #00365A);
+  box-shadow: 0 0 0 0.1rem rgba(0, 54, 90, 0.25);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+  color: var(--Colors-Colors-Brand-Brand-Typography-Main-Black, #3A3A3A);
+}
+
+/* Alert styles */
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+}
+
+/* Tambahkan ke bagian <style> */
+
+/* Form validation styles */
+.recommendation-form .form-text {
+  font-size: 0.75rem;
+}
+
+.recommendation-form .form-control.is-invalid {
+  border-color: #dc3545;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.recommendation-form .invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #dc3545;
+}
+
+/* Tambahkan ke bagian <style> */
+
+/* Recommendation Styling */
+.recommendation-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3A3A3A;
+  margin-bottom: 1rem;
+}
+
+.pending-recommendation-item {
+  padding: 16px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #e9ecef;
+  opacity: 0.75;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.recommendation-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-text {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.recommendation-source h6 {
+  font-size: 0.938rem;
+  margin-bottom: 2px;
+  color: #6c757d;
+}
+
+.pending-badge {
+  font-size: 0.75rem;
+  background-color: #e9ecef;
+  color: #6c757d;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.recommendation-content {
+  margin-top: 10px;
+}
+
+.recommendation-content p {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  white-space: pre-line;
+}
+
 /* Responsive adjustments */
 @media (min-width: 768px) {
   .experience-item .col-md-2 {
@@ -949,7 +1357,7 @@ h2 {
     text-align: center;
   }
   
-  .talent-contact-info span.ml-3 {
+  .talent-contact_info span.ml-3 {
     margin-left: 0 !important;
     margin-top: 8px;
   }

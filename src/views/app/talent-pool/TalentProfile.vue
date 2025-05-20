@@ -309,7 +309,11 @@
               <div v-else>
                 <!-- Accepted Recommendations -->
                 <div v-if="groupedRecommendations.accepted.length > 0">
-                  <Recommendation :recommendations="acceptedRecommendations" />
+                  <Recommendation 
+                    :recommendations="acceptedRecommendations" 
+                    :current-user-id="currentUser?.id"
+                    @delete-recommendation="deleteRecommendation"
+                  />
                 </div>
                 
                 <!-- Pending Recommendations -->
@@ -323,6 +327,15 @@
                             <h6 class="mb-1">{{ rec.contractorName }}</h6>
                           </div>
                         </div>
+                        
+                        <button 
+                          v-if="isOwnRecommendation(rec)"
+                          @click="deleteRecommendation(rec.id)"
+                          class="btn-sm btn-outline-danger"
+                          title="Hapus rekomendasi ini"
+                        >
+                          <i class="simple-icon-trash"></i>
+                        </button>
                       </div>
                       <div class="recommendation-content mt-2 text-muted">
                         <p>{{ rec.message }}</p>
@@ -418,6 +431,14 @@ export default {
     }
   },
   methods: {
+    /**
+     * Check if a recommendation was created by the current user
+     */
+    isOwnRecommendation(recommendation) {
+      if (!this.currentUser) return false;
+      return parseInt(recommendation.contractorId) === parseInt(this.currentUser.id);
+    },
+    
     /**
      * Fetch talent profile data from API
      */
@@ -745,6 +766,51 @@ export default {
         });
       } finally {
         this.downloadingCert = null;
+      }
+    },
+
+    /**
+     * Delete recommendation from the talent profile
+     * @param {String} recommendationId - The ID of the recommendation to delete
+     */
+    async deleteRecommendation(recommendationId) {
+      try {
+        // Confirm deletion
+        if (!confirm('Apakah Anda yakin ingin menghapus rekomendasi ini?')) {
+          return;
+        }
+        
+        // Check if user is logged in and has an ID
+        if (!this.currentUser || !this.currentUser.id) {
+          this.$bvToast.toast('Anda harus login untuk menghapus rekomendasi', {
+            title: 'Login Diperlukan',
+            variant: 'warning',
+            solid: true
+          });
+          return;
+        }
+        
+        // Call the API with both recommendationId and contractorId (parsed as integer)
+        await TalentProfileService.deleteRecommendation(recommendationId, parseInt(this.currentUser.id));
+        
+        // Remove from the local state
+        this.recommendations = this.recommendations.filter(rec => rec.id !== recommendationId);
+        
+        // Show success message
+        this.$bvToast.toast('Rekomendasi berhasil dihapus', {
+          title: 'Sukses',
+          variant: 'success',
+          solid: true
+        });
+      } catch (error) {
+        console.error('Error deleting recommendation:', error);
+        
+        // Show error message
+        this.$bvToast.toast('Gagal menghapus rekomendasi. Silakan coba lagi.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
       }
     },
 

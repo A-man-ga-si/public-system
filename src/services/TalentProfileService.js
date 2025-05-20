@@ -109,14 +109,9 @@ const createRecommendation = (talentId, recommendation) => {
     }
   });
 };
-/**
- * Delete a recommendation
- * Endpoint: DELETE /recommendations/{recommendationId}
- * @param {String} recommendationId - The ID of the recommendation to delete
- * @returns {Promise} - API response
- */
-const deleteRecommendation = (recommendationId) => {
-  return axios.delete(`${apiUrlTalentPool}/recommendations/${recommendationId}`, {
+
+const deleteRecommendation = (recommendationId, contractorId) => {
+  return axios.delete(`${apiUrlTalentPool}/recommendations/user/contractor/${recommendationId}/${contractorId}`, {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'

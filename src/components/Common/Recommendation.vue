@@ -7,11 +7,22 @@
         :key="recommendation.id"
         class="recommendation-item"
       >
-        <div class="recommendation-content">
+        <div class="recommendation-header">
           <h5 class="recommendation-company">
             {{ recommendation.contractorName }}
           </h5>
+          
+          <button 
+            v-if="isOwnRecommendation(recommendation)"
+            @click="$emit('delete-recommendation', recommendation.id)"
+            class="btn-delete-recommendation"
+            title="Hapus rekomendasi ini"
+          >
+            <i class="simple-icon-trash"></i>
+          </button>
+        </div>
 
+        <div class="recommendation-content">
           <p class="recommendation-message">
             <template v-if="isExpanded[recommendation.id]">
               {{ recommendation.message }}
@@ -59,6 +70,10 @@ export default {
     recommendations: {
       type: Array,
       default: () => []
+    },
+    currentUserId: {
+      type: [String, Number],
+      default: null
     }
   },
   data() {
@@ -81,6 +96,10 @@ export default {
     },
     toggleExpand(id, expanded) {
       this.$set(this.isExpanded, id, expanded);
+    },
+    isOwnRecommendation(recommendation) {
+      if (!this.currentUserId) return false;
+      return parseInt(recommendation.contractorId) === parseInt(this.currentUserId);
     }
   }
 };
@@ -138,6 +157,28 @@ export default {
 .recommendation-empty {
   font-size: 0.875rem;
   color: #64748b;
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.btn-delete-recommendation {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-delete-recommendation:hover {
+  background-color: rgba(220, 53, 69, 0.1);
 }
 
 .message-toggle-button {

@@ -48,7 +48,7 @@
           <!-- Left Column - Profile Image -->
           <div class="col-md-3 mb-4">
             <img 
-              :src="talent.image || require('@/assets/img/profiles/l-2.jpg')" 
+              :src="talent.image || require('@/assets/img/profiles/dummyprofile.svg')" 
               alt="Talent Image" 
               class="img-fluid profile-image" 
             />
@@ -120,19 +120,19 @@
                 <div v-for="(exp, index) in experiences" :key="exp.id" class="experience-item">
                   <div class="row align-items-center">
                     <!-- Logo Column -->
-                    <div class="col-md-1 col-3 text-center mb-2 mb-md-0">
+                    <div class="col-md-2 col-3 text-center mb-2 mb-md-0">
                       <div class="company-logo-container">
                         <div class="company-logo" v-if="exp.companyImage">
                           <img :src="exp.companyImage" :alt="exp.company" />
                         </div>
                         <div v-else class="company-logo">
-                          <img :src="require('@/assets/img/cards/thumb-1.jpg')" alt="Company Logo" />
+                          <img :src="require('@/assets/logos/rencanakan-logo.png')" alt="Company Logo" />
                         </div>
                       </div>
                     </div>
                     
                     <!-- Text Column -->
-                    <div class="col-md-11 col-9">
+                    <div class="col-md-10 col-9">
                       <h5 class="mb-1">{{ exp.title }}</h5>
                       <p class="mb-1 company-details-employment-type">
                         {{ exp.company }} · {{ formatEmploymentType(exp.employmentType) }}
@@ -191,24 +191,25 @@
                   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                     <div class="d-flex align-items-center mb-3 mb-sm-0">
                       <IconPdf class="mr-3" />
-                      <div>
-                        <span class="certification-title"><b>{{ cert.title }}</b></span>
-                        <small class="text-muted d-block certification-details">
-                          File: {{ cert.file }}
-                        </small>
-                      </div>
+                    <div>
+                      <span class="certification-title"><b>{{ cert.title }}</b></span>
+                      <small class="text-muted d-block certification-size">{{ formatFileSizeDummy(cert.fileSize) }}</small>
+                    </div>
                     </div>
                     <div class="certificate-actions">
                       <b-button 
                         variant="primary" 
                         @click="dummyDownloadCertificate(cert)" 
-                        size="sm" 
-                        class="d-flex align-items-center"
+                        size="lg" 
+                        class="d-flex align-items-center download-button"
                         :disabled="downloadingCert === cert.id"
                       >
                         <div v-if="downloadingCert === cert.id" class="loading-small mr-1"></div>
-                        <i v-else class="simple-icon-cloud-download mr-1"></i>
-                        <span>{{ downloadingCert === cert.id ? 'Downloading...' : 'Download' }}</span>
+                        <template v-else>
+                          <span class="mr-2">Download File</span>
+                          <IconDownloadButton />
+                        </template>
+                        <!-- <span>{{ downloadingCert === cert.id ? 'Downloading...' : 'Download' }}</span> -->
                       </b-button>
                     </div>
                   </div>
@@ -359,6 +360,7 @@ import IconWhatsapp from '@/assets/icons/IconWhatsapp.vue';
 import IconLocation from '@/assets/icons/IconLocation.vue';
 import TalentProfileService from '@/services/TalentProfileService';
 import Recommendation from '@/components/Common/Recommendation.vue';
+import IconDownloadButton from '@/assets/icons/IconDownloadButton.vue';
 import { getCurrentUser } from '@/utils';
 
 export default {
@@ -369,6 +371,7 @@ export default {
     IconWhatsapp,
     IconLocation,
     Recommendation,
+    IconDownloadButton
   },
   data() {
     const currentUser = getCurrentUser();
@@ -437,6 +440,16 @@ export default {
     isOwnRecommendation(recommendation) {
       if (!this.currentUser) return false;
       return parseInt(recommendation.contractorId) === parseInt(this.currentUser.id);
+    },
+
+    formatFileSize(bytes) {
+      if (!bytes || bytes === 0) return '0 MB';
+      const mbSize = bytes / (1024 * 1024);
+      return mbSize.toFixed(1) + ' MB';
+    },
+
+    formatFileSizeDummy(bytes) {
+      return (0.4 + Math.floor(Math.random() * ((2.5 - 0.4) / 0.1 + 1)) * 0.1).toFixed(1) + " MB";
     },
     
     /**
@@ -688,10 +701,13 @@ export default {
      * Sesuai dengan response backend yang diberikan
      */
     mapApiDataToComponent(apiData) {
+      // Get profile image from query parameter if available
+      const queryProfileImage = this.$route.query.profileImage;
+      
       return {
         id: apiData.id,
         name: `${apiData.firstName} ${apiData.lastName}`,
-        image: apiData.photo || require('@/assets/img/profiles/l-2.jpg'),
+        image: queryProfileImage || apiData.photo || require('@/assets/img/profiles/dummyprofile.svg'),
         location: apiData.currentLocation,
         phone: apiData.phoneNumber,
         level: apiData.skkLevel,
@@ -974,7 +990,7 @@ h1, h2, h3, h4, h5, h6 {
   height: auto;
   object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05); */
 }
 
 /* Section Styles */
@@ -1116,10 +1132,36 @@ h2 {
   display: block;
 }
 
-.certification-details {
+/* Certification items */
+.certification-item {
+  border-radius: var(--radi-lg, 12px);
+  border: 1px solid var(--Colors-Colors-Base-Light-Gray, #ECEDEE);
+  background: var(--Colors-Colors-Base-Lightest-Gray, #F8F8F8);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.certification-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--Colors-Colors-Brand-Brand-Typography-Main-Black, #3A3A3A);
+}
+
+.certification-size {
   font-size: 0.75rem;
   color: #6c757d;
-  margin-top: 2px;
+}
+
+.btn-download {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50px;
+}
+
+.btn-download:hover {
+  background-color: #002541;
 }
 
 .location-badge {
@@ -1165,13 +1207,10 @@ h2 {
 
 /* Mengatur ukuran dan style logo */
 .company-logo {
-  width: 64px;
-  height: 64px;
+  width: 90px;
+  object-fit: contain;
   border-radius: 4px;
-  background-color: #F0F0F0;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
+  margin-bottom: 8px;
 }
 
 .company-logo img {
@@ -1231,17 +1270,17 @@ h2 {
   color: #dc3545;
 }
 
+.download-button {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
 /* Certificate actions */
 .certificate-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.certificate-actions .btn {
-  border-radius: 4px;
-  padding: 6px 12px;
 }
 
 .lighter-text {

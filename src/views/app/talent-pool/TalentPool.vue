@@ -80,7 +80,7 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="talents.length === 0" class="empty-container text-center py-5">
+        <div v-else-if="!loading && talents.length === 0" class="empty-container text-center py-5">
           <i class="simple-icon-magnifier-remove empty-icon"></i>
           <p class="mt-2">Tidak ada talent yang ditemukan</p>
         </div>
@@ -244,6 +244,7 @@ export default {
     },
     async fetchTalents() {
       try {
+        // Set loading to true before making API call
         this.loading = true;
         
         // Prepare API parameters based on the active tab and filters
@@ -258,6 +259,7 @@ export default {
         this.talents = [];
         this.$toast.error('Gagal memuat data. Silakan coba lagi.');
       } finally {
+        // Make sure to set loading to false regardless of success or failure
         this.loading = false;
       }
     },
@@ -329,11 +331,19 @@ export default {
       this.handleFilterChange();
     }
   },
-  created() {
-    // Fetch filter options first
-    this.fetchFilterOptions();
-    // Then fetch talents
-    this.fetchTalents();
+  async created() {
+    try {
+      // Set loading state at component creation
+      this.loading = true;
+      
+      // Fetch filter options first
+      await this.fetchFilterOptions();
+      
+      // Then fetch talents
+      await this.fetchTalents();
+    } catch (error) {
+      console.error("Error initializing component:", error);
+    }
   }
 };
 </script>

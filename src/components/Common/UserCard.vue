@@ -4,7 +4,7 @@
       <div class="talent-image-container">
         <img 
           class="talent-image" 
-          :src="require('@/assets/img/profiles/2.jpg')" 
+          :src="profileImage" 
           :alt="`${user.firstName} ${user.lastName}`" 
         />
         <div class="talent-badge experience-badge" v-if="user.experienceYears">
@@ -40,6 +40,10 @@ export default {
     }
   },
   computed: {
+    profileImage() {
+      const randomImageNumber = Math.floor(Math.random() * 10) + 1;
+      return require(`@/assets/img/profiles/l-${randomImageNumber}.jpg`);
+    },
     formattedPrice() {
       if (!this.user.price) return '';
       return new Intl.NumberFormat('id-ID').format(this.user.price);
@@ -62,7 +66,11 @@ export default {
     },
     navigateToProfile() {
       if (this.user && this.user.id) {
-        this.$router.push({ name: 'TalentProfile', params: { talentId: this.user.id } });
+        this.$router.push({ 
+          name: 'TalentProfile', 
+          params: { talentId: this.user.id },
+          query: { profileImage: this.profileImage }
+        });
       } else {
         console.error('User ID is missing, cannot navigate to profile.');
       }

@@ -17,7 +17,7 @@
       <div class="talent-info">
         <h3 class="talent-name">{{ user.firstName }} {{ user.lastName }}</h3>
         <p class="talent-location" v-if="user.currentLocation">
-          <i class="simple-icon-location-pin"></i> {{ user.currentLocation }}
+          <i class="simple-icon-location-pin"></i>{{ getLocationLabel(user.currentLocation) }}
         </p>
         <div class="talent-footer">
           <div class="talent-price" v-if="user.price">Rp {{ formattedPrice }}</div>
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { skills } from '@/constants/filterData'
+import { skills, locations } from '@/constants/filterData'
 
 export default {
   name: 'UserCard',
@@ -63,6 +63,10 @@ export default {
     getSkillLabel(skillValue) {
       const skill = skills.find(s => s.value === skillValue);
       return skill ? skill.label : skillValue;
+    },
+    getLocationLabel(locationValue) {
+      const location = locations.find(s => s.value === locationValue);
+      return location ? location.label : locationValue;
     },
     navigateToProfile() {
       if (this.user && this.user.id) {

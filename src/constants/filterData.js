@@ -51,3 +51,9 @@ export const hargaJasa = {
     { value: 'sains_rekayasa_teknik', label: 'Sains & Rekayasa Teknik' },
     { value: 'lainnya', label: 'Lainnya' },
   ];
+
+  export const skkLevels = [
+    { value: 'operator', label: 'Operator' },
+    { value: 'teknisi-analisis', label: 'Teknisi - Analisis' },
+    { value: 'profesional', label: 'Profesional' },
+  ];

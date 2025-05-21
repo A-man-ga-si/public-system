@@ -68,7 +68,7 @@
                 <div class="talent-badges mb-4">
                   <span class="badge badge-info mr-2">{{ talent.level }}</span>
                   <span class="badge badge-info mr-2">{{ talent.experienceYears }} Tahun Pengalaman</span>
-                  <span class="badge badge-secondary">{{ talent.mainSkill }}</span>
+                  <span class="badge badge-secondary">{{ getSkillLabel(talent.mainSkill) }}</span>
                 </div>
               </div>
             </div>
@@ -362,6 +362,7 @@ import TalentProfileService from '@/services/TalentProfileService';
 import Recommendation from '@/components/Common/Recommendation.vue';
 import IconDownloadButton from '@/assets/icons/IconDownloadButton.vue';
 import { getCurrentUser } from '@/utils';
+import { skills, locations, skkLevels } from '@/constants/filterData';
 
 export default {
   name: 'TalentProfile',
@@ -696,6 +697,21 @@ export default {
       }
     },
 
+    getSkillLabel(skillValue) {
+      const skill = skills.find(s => s.value === skillValue);
+      return skill ? skill.label : skillValue;
+    },
+
+    getLocationLabel(locationValue) {
+      const location = locations.find(l => l.value === locationValue);
+      return location ? location.label : locationValue;
+    },
+    
+    getSkkLevelLabel(levelValue) {
+      const level = skkLevels.find(l => l.value === levelValue);
+      return level ? level.label : levelValue;
+    },
+
     /**
      * Map API data to component format
      * Sesuai dengan response backend yang diberikan
@@ -708,14 +724,15 @@ export default {
         id: apiData.id,
         name: `${apiData.firstName} ${apiData.lastName}`,
         image: queryProfileImage || apiData.photo || require('@/assets/img/profiles/dummyprofile.svg'),
-        location: apiData.currentLocation,
+        location: this.getLocationLabel(apiData.currentLocation),
         phone: apiData.phoneNumber,
-        level: apiData.skkLevel,
+        level: this.getSkkLevelLabel(apiData.skkLevel),
         experienceYears: apiData.experienceYears?.toString() || '0',
-        mainSkill: apiData.skill,
+        mainSkill: this.getSkillLabel(apiData.skill),
         price: apiData.price,
         about: apiData.aboutMe,
-        preferredLocations: apiData.preferredLocations || []
+        preferredLocations: Array.isArray(apiData.preferredLocations) ? 
+          apiData.preferredLocations.map(loc => this.getLocationLabel(loc)) : []
       };
     },
 
